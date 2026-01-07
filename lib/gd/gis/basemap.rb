@@ -13,7 +13,7 @@ module GD
       end
 
       def url(z,x,y)
-        "https://basemaps.cartocdn.com/light_all/#{z}/#{x}/#{y}.png"
+        "https://tile.openstreetmap.org/#{z}/#{x}/#{y}.png"
       end
 
       def lon2tile(lon)
@@ -45,10 +45,20 @@ module GD
             path = "tmp/tiles/#{@zoom}_#{x}_#{y}.png"
             unless File.exist?(path)
               uri = URI(url(@zoom,x,y))
+
               Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
-                res = http.get(uri.path)
+                req = Net::HTTP::Get.new(uri)
+                req["User-Agent"] = "libgd-gis/0.1 (Ruby)"
+
+                res = http.request(req)
+
+                unless res.code == "200"
+                  raise "Tile fetch failed #{res.code}"
+                end
+
                 File.binwrite(path, res.body)
               end
+
             end
             tiles << [x,y,path]
           end

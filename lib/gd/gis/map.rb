@@ -13,12 +13,24 @@ module GD
         @layers = []
       end
 
-      def add_points(data, lon:, lat:, icon:)
-        @layers << PointsLayer.new(data, lon: lon, lat: lat, icon: icon)
+      def add_points(data, lon:, lat:, icon:, label: nil, font: nil, size: 12, color: [0,0,0])
+        @layers << PointsLayer.new(
+          data,
+          lon: lon,
+          lat: lat,
+          icon: icon,
+          label: label,
+          font: font,
+          size: size,
+          color: color
+        )
       end
 
       def render
         tiles, x_min, y_min = @basemap.fetch_tiles
+
+        x0 = x_min * 256
+        y0 = y_min * 256
 
         cols = tiles.map{|t| t[0]}.uniq.size
         rows = tiles.map{|t| t[1]}.uniq.size
@@ -27,6 +39,8 @@ module GD
         height = rows * 256
 
         @img = GD::Image.new(width,height)
+        @img.alpha_blending = true
+        @img.save_alpha = true
 
         tiles.each do |x,y,path|
           tile = GD::Image.open(path)
@@ -42,7 +56,11 @@ module GD
         max_y = Projection.mercator_y(@bbox[3])
 
         projector = ->(lon,lat) {
-          Projection.lonlat_to_pixel(lon,lat,min_x,max_x,min_y,max_y,width,height)
+          px = ((lon + 180.0) / 360.0 * (2 ** @zoom) * 256)
+          rad = lat * Math::PI / 180.0
+          py = ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math::PI) / 2 * (2 ** @zoom) * 256)
+
+          [ (px - x0).to_i, (py - y0).to_i ]
         }
 
         @layers.each { |l| l.render!(@img, projector) }
@@ -96,6 +114,8 @@ module GD
 
         # recortar al tamaño exacto del tile
         img = GD::Image.new(256,256)
+        img.alpha_blending = true
+        img.save_alpha = true
         img.copy(submap.instance_variable_get(:@img), 0,0,0,0,256,256)
         img
       end
