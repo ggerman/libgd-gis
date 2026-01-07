@@ -1,24 +1,54 @@
-# libgd-gis
+# LibGD-GIS
 
-**A geospatial raster engine for Ruby**
+<p align="center">
+  <a href="https://rubystacknews.com/2026/01/07/ruby-can-now-draw-maps-and-i-started-with-ice-cream/">
+    <img src="https://img.shields.io/badge/RubyStackNews-CC342D?style=for-the-badge&logo=ruby&logoColor=white" />
+  </a>
+  <a href="https://x.com/ruby_stack_news">
+    <img src="https://img.shields.io/badge/Twitter%20@RubyStackNews-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
+  </a>
+  <a href="https://www.linkedin.com/in/germ%C3%A1n-silva-56a12622/">
+    <img src="https://img.shields.io/badge/Germán%20Silva-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
+  </a>
+</p>
 
-Render real maps, GeoJSON layers, and geospatial data directly in Ruby using a native raster backend powered by **libgd**.
+<p align="center">
+  <a href="https://rubygems.org/gems/libgd-gis">
+    <img src="https://img.shields.io/badge/RubyGems-libgd--gis-CC342D?style=for-the-badge&logo=rubygems&logoColor=white" />
+  </a>
+  <a href="https://github.com/ggerman/libgd-gis">
+    <img src="https://img.shields.io/badge/GitHub-libgd--gis-181717?style=for-the-badge&logo=github&logoColor=white" />
+  </a>
+  <a href="https://github.com/ggerman/ruby-libgd">
+    <img src="https://img.shields.io/badge/Engine-ruby--libgd-CC342D?style=for-the-badge&logo=ruby&logoColor=white" />
+  </a>
+</p>
 
-This project brings back something Ruby lost over time:  
-the ability to generate **maps, tiles, and geospatial visualizations natively**, without external tools like QGIS, ImageMagick, or Mapbox.
+<p align="right">
+  <img src="docs/images/logo-gis.png" width="160" />
+</p>
+
+
+| Examples | Examples | Examples |
+| :----: | :----: | :--: |
+| <img src="docs/examples/america.png" height="250"> | <img src="docs/examples/argentina_museum.png" height="250"> | <img src="docs/examples/museos_parana.png" height="250"> |
+| <img src="docs/examples/asia.png" height="250"> | <img src="docs/examples/europe.png" height="250"> | <img src="docs/examples/icecream_parana.png" height="250"> |
+| <img src="docs/examples/argentina_cities.png" height="250"> | <img src="docs/examples/tanzania_hydro.png" height="250"> |  |
 
 ---
 
-## 🌍 Example
+## A geospatial raster engine for Ruby.
 
-This map of Tanzania was generated entirely in Ruby from a GeoJSON dataset of hydroelectric power plants:
+libgd-gis allows Ruby to render real maps, GeoJSON layers, vector features, and geospatial tiles using a native raster backend powered by **libgd**.
 
-![Tanzania hydro plants](examples/output/tanzania_hydro.png)
+It restores something Ruby lost over time:
+ the ability to generate **maps, tiles, and GIS-grade visualizations natively**, without relying on external tools like QGIS, Mapnik, ImageMagick, or Mapbox.
 
-No JavaScript.  
-No QGIS.  
-No Mapbox.  
-Just Ruby.
+Built on top of **ruby-libgd**, this project turns Ruby into a **map rendering engine**, capable of producing spatial graphics, tiled maps, and geospatial outputs directly inside Ruby processes.
+
+- No external renderers.
+-  No shelling out.
+-  Just Ruby, raster, and GIS.
 
 ---
 
@@ -75,29 +105,46 @@ Render hydroelectric plants from a GeoJSON file:
 require "json"
 require "gd/gis"
 
-geo = JSON.parse(File.read("hydro_plants.geojson"))
-plants = geo["features"]
+# ---------------------------
+# Bounding box mundial
+# ---------------------------
+AMERICA = [-170, -60, -30, 75]
 
-lons = plants.map { |f| f["geometry"]["coordinates"][0] }
-lats = plants.map { |f| f["geometry"]["coordinates"][1] }
-
-bbox = [lons.min, lats.min, lons.max, lats.max]
-
+# ---------------------------
+# Crear mapa
+# ---------------------------
 map = GD::GIS::Map.new(
-  bbox: bbox,
-  zoom: 7,
+  bbox: AMERICA,
+  zoom: 4,
   basemap: :carto_light
 )
 
+# Cargar datos
+# ---------------------------
+peaks = JSON.parse(File.read("picks.json"))
+
+# ---------------------------
+# Agregar capa de puntos
+# ---------------------------
 map.add_points(
-  plants,
-  lon: ->(f) { f["geometry"]["coordinates"][0] },
-  lat: ->(f) { f["geometry"]["coordinates"][1] },
-  icon: "hydro.png"
+  peaks,
+  lon: ->(p) { p["longitude"] },
+  lat: ->(p) { p["latitude"] },
+  icon: "peak.png",
+  label: ->(p) { p["name"] },
+  font: "./fonts/DejaVuSans.ttf",
+  size: 10,
+  color: [0,0,0]
 )
 
+# ---------------------------
+# Renderizar y guardar
+# ---------------------------
 map.render
-map.save("tanzania_hydro.png")
+map.save("output/america.png")
+
+puts "Saved output/america.png"
+
 ```
 
 ---
@@ -122,6 +169,6 @@ MIT
 
 ## Author
 
-Germán Silva  
-https://github.com/ggerman  
+Germán Silva
+https://github.com/ggerman
 https://rubystacknews.com
