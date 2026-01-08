@@ -1,2 +1,8 @@
 examples/tmp
 examples/tmp/*
+
+docker-compose.yml
+Dockerfile
+libgd-gis-*.gem
+tmp
+tmp/*
