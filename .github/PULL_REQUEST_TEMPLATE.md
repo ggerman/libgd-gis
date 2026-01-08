@@ -1,7 +1,7 @@
 # Pull Request
 
-Thank you for contributing to **ruby-libgd** 🚀  
-This project provides native image rendering for Ruby.
+Thank you for contributing to **libgd-gis** 🗺  
+This project brings native GIS and map rendering to Ruby.
 
 ---
 
@@ -9,28 +9,44 @@ This project provides native image rendering for Ruby.
 
 Describe clearly what this change does:
 - bug fix
-- new feature
+- new GIS feature
+- projection or coordinate fix
 - performance improvement
 - refactor
 - documentation
 
 ---
 
-## How was this tested?
+## What geographic data does this affect?
 
-Explain how you tested the change:
-- unit tests
-- example scripts
-- generated images
-- benchmarks
+Describe:
+- city / region
+- bounding box
+- projection
+- zoom levels
+
+Example:
+> Paraná, Argentina — bbox [-60.56, -31.76, -60.50, -31.71] at zoom 15
 
 ---
 
-## Screenshots or output (if applicable)
+## How was this tested?
 
-If this affects rendering, please attach:
-- before/after images
-- sample output files
+Explain how you validated the change:
+- example scripts
+- rendered maps
+- screenshots
+- comparison images
+
+GIS changes must be visually verified.
+
+---
+
+## Screenshots / output
+
+Attach:
+- before / after map images
+- generated tiles if applicable
 
 ---
 
@@ -44,7 +60,7 @@ Link any related issues:
 
 ## Checklist
 
-- [ ] I tested this change locally
-- [ ] I added or updated tests if needed
+- [ ] I tested this change with real map data
+- [ ] I verified projections and coordinates are correct
+- [ ] I checked label placement and rendering quality
 - [ ] I did not break existing APIs
-- [ ] I verified image output is correct
