@@ -1,0 +1,62 @@
+name: 🐞 Bug report
+description: Something is wrong with map rendering, projection, or labels
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve **libgd-gis** 🚀
+        This library renders real maps natively in Ruby.
+        Please provide a minimal reproducible example so we can fix it fast.
+
+  - type: input
+    id: version
+    attributes:
+      label: libgd-gis version
+      placeholder: "0.1.3"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bbox
+    attributes:
+      label: Bounding box
+      description: The geographic area you are rendering
+      placeholder: "-60.56, -31.76, -60.50, -31.71"
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Ruby code to reproduce
+      description: Paste the smallest script that shows the problem
+      render: ruby
+      placeholder: |
+        require "gd/gis"
+
+        map = GD::GIS::Map.new(
+          bbox: [-60.56, -31.76, -60.50, -31.71],
+          zoom: 15
+        )
+
+        map.render("test.png")
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to see?
+      placeholder: "Streets should be visible and labels should not overlap..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What did you actually see?
+      placeholder: "Streets are missing / labels overlap / projection is wrong..."
+    validations:
+      required: true

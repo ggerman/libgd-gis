@@ -1,0 +1,33 @@
+name: ✨ Feature request
+description: Suggest new GIS or map rendering features
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        libgd-gis is building a native GIS engine for Ruby.
+        Tell us what map features you need next.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to achieve?
+      placeholder: "I need to render GeoJSON polygons for city boundaries..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: How should the API look?
+      placeholder: |
+        map.add_polygons(geojson, fill: true, stroke: true)
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Use case
+      placeholder: "This would be used for map tiles, dashboards, or spatial reports..."
