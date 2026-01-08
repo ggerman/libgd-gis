@@ -1,7 +1,10 @@
 require "gd"
 require_relative "basemap"
 require_relative "projection"
+require_relative "geometry"
 require_relative "layer_points"
+require_relative "layer_lines"
+require_relative "layer_polygons"
 
 module GD
   module GIS
@@ -13,7 +16,7 @@ module GD
         @layers = []
       end
 
-      def add_points(data, lon:, lat:, icon:, label: nil, font: nil, size: 12, color: [0,0,0])
+      def add_points(data, lon:, lat:, icon: nil, label: nil, font: nil, size: 12, color: [0,0,0])
         @layers << PointsLayer.new(
           data,
           lon: lon,
@@ -26,44 +29,64 @@ module GD
         )
       end
 
+      def add_lines(features, stroke:, fill: nil, width:)
+        if fill
+          @layers << PolygonsLayer.from_lines(features,
+            stroke: stroke,
+            fill: fill,
+            width: width
+          )
+        else
+          @layers << LinesLayer.new(features,
+            stroke: stroke,
+            width: width
+          )
+        end
+      end
+
+      def add_polygons(polygons, fill:, stroke: nil, width: nil)
+        @layers << PolygonsLayer.new(polygons, fill: fill, stroke: stroke, width: width)
+      end
+
       def render
         tiles, x_min, y_min = @basemap.fetch_tiles
 
-        x0 = x_min * 256
-        y0 = y_min * 256
+        # 🔥 Origen REAL del canvas en WebMercator global pixels
+        origin_x = x_min * 256
+        origin_y = y_min * 256
 
-        cols = tiles.map{|t| t[0]}.uniq.size
-        rows = tiles.map{|t| t[1]}.uniq.size
+        x_vals = tiles.map { |t| t[0] }
+        y_vals = tiles.map { |t| t[1] }
 
-        width = cols * 256
+        cols = x_vals.max - x_vals.min + 1
+        rows = y_vals.max - y_vals.min + 1
+
+        width  = cols * 256
         height = rows * 256
 
-        @img = GD::Image.new(width,height)
+        @img = GD::Image.new(width, height)
         @img.alpha_blending = true
         @img.save_alpha = true
 
-        tiles.each do |x,y,path|
+        # Dibujar tiles en sistema LOCAL del mosaico
+        tiles.each do |x, y, path|
           tile = GD::Image.open(path)
           cx = x - x_min
           cy = y - y_min
-          @img.copy(tile, cx*256, cy*256, 0,0,256,256)
+          @img.copy(tile, cx * 256, cy * 256, 0, 0, 256, 256)
         end
 
-        # projection bbox
-        min_x = Projection.mercator_x(@bbox[0])
-        max_x = Projection.mercator_x(@bbox[2])
-        min_y = Projection.mercator_y(@bbox[1])
-        max_y = Projection.mercator_y(@bbox[3])
+        # 🔥 Proyección correcta: global → local
+        projection = ->(lon, lat) do
+          gx, gy = GD::GIS::Projection.lonlat_to_global_px(lon, lat, @zoom)
 
-        projector = ->(lon,lat) {
-          px = ((lon + 180.0) / 360.0 * (2 ** @zoom) * 256)
-          rad = lat * Math::PI / 180.0
-          py = ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math::PI) / 2 * (2 ** @zoom) * 256)
+          x = gx - origin_x
+          y = gy - origin_y
 
-          [ (px - x0).to_i, (py - y0).to_i ]
-        }
+          [x.round, y.round]
+        end
 
-        @layers.each { |l| l.render!(@img, projector) }
+        @layers.each { |l| l.render!(@img, projection) }
       end
 
       def tile2lon(x, z)
@@ -75,15 +98,15 @@ module GD
         180.0 / Math::PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)))
       end
 
-      def tile_bbox(z,x,y)
+      def tile_bbox(z, x, y)
         west  = tile2lon(x, z)
-        east  = tile2lon(x+1, z)
+        east  = tile2lon(x + 1, z)
         north = tile2lat(y, z)
-        south = tile2lat(y+1, z)
+        south = tile2lat(y + 1, z)
         [west, south, east, north]
       end
 
-      def intersect_bbox(a,b)
+      def intersect_bbox(a, b)
         [
           [a[0], b[0]].max,
           [a[1], b[1]].max,
@@ -92,13 +115,12 @@ module GD
         ]
       end
 
-      def tile(z,x,y)
-        tb = tile_bbox(z,x,y)
+      def tile(z, x, y)
+        tb = tile_bbox(z, x, y)
         ib = intersect_bbox(@bbox, tb)
 
-        # Si no hay intersección, devolvemos tile vacío
         if ib[0] >= ib[2] || ib[1] >= ib[3]
-          return GD::Image.new(256,256)
+          return GD::Image.new(256, 256)
         end
 
         submap = GD::GIS::Map.new(
@@ -107,16 +129,14 @@ module GD
           basemap: :carto_light
         )
 
-        # copiar capas
         @layers.each { |l| submap.instance_variable_get(:@layers) << l }
 
         submap.render
 
-        # recortar al tamaño exacto del tile
-        img = GD::Image.new(256,256)
+        img = GD::Image.new(256, 256)
         img.alpha_blending = true
         img.save_alpha = true
-        img.copy(submap.instance_variable_get(:@img), 0,0,0,0,256,256)
+        img.copy(submap.instance_variable_get(:@img), 0, 0, 0, 0, 256, 256)
         img
       end
 

@@ -20,6 +20,20 @@ module GD
 
         [px.to_i, py.to_i]
       end
+
+      TILE_SIZE = 256
+
+      def self.lonlat_to_global_px(lon, lat, zoom)
+        lat = [[lat, 85.05112878].min, -85.05112878].max
+        n = 2.0 ** zoom
+
+        x = (lon + 180.0) / 360.0 * n * TILE_SIZE
+
+        lat_rad = lat * Math::PI / 180.0
+        y = (1.0 - Math.log(Math.tan(lat_rad) + 1.0 / Math.cos(lat_rad)) / Math::PI) / 2.0 * n * TILE_SIZE
+
+        [x, y]
+      end
     end
   end
 end

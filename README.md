@@ -33,7 +33,8 @@
 | :----: | :----: | :--: |
 | <img src="docs/examples/america.png" height="250"> | <img src="docs/examples/argentina_museum.png" height="250"> | <img src="docs/examples/museos_parana.png" height="250"> |
 | <img src="docs/examples/asia.png" height="250"> | <img src="docs/examples/europe.png" height="250"> | <img src="docs/examples/icecream_parana.png" height="250"> |
-| <img src="docs/examples/argentina_cities.png" height="250"> | <img src="docs/examples/tanzania_hydro.png" height="250"> |  |
+| <img src="docs/examples/argentina_cities.png" height="250"> | <img src="docs/examples/tanzania_hydro.png" height="250"> | <img src="docs/examples/parana_polygon.png" height="250"> |
+| <img src="docs/examples/parana_carto_dark.png" height="250"> | <img src="docs/examples/ramirez_avenue.png" height="250"> | |
 
 ---
 
