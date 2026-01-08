@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We currently support the latest released version of **ruby-libgd**.
+We currently support the latest released version of **libgd-gis**.
 
 | Version | Supported |
 |--------|----------|
@@ -14,7 +14,7 @@ Older versions may not receive security updates.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ruby-libgd, please do NOT open a public issue.
+If you discover a security vulnerability in libgd-gis, please do NOT open a public issue.
 
 Instead, please report it privately by emailing:
 
