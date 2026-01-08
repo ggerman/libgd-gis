@@ -18,7 +18,7 @@ If you discover a security vulnerability in libgd-gis, please do NOT open a publ
 
 Instead, please report it privately by emailing:
 
-📧 **security@rubystacknews.com**
+📧 **ggerman@gmail.com**
 
 Include:
 - a description of the issue
