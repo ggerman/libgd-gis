@@ -1,0 +1,57 @@
+name: libgd-gis CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install system dependencies (libgd)
+      - name: Install GD
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            libgd-dev \
+            libgd3 \
+            libgd-tools \
+            pkg-config \
+            build-essential
+
+      # Fix pkg-config for libgd (same trick you used in Docker)
+      - name: Configure gd.pc
+        run: |
+          sudo mkdir -p /usr/lib/x86_64-linux-gnu/pkgconfig
+          sudo tee /usr/lib/x86_64-linux-gnu/pkgconfig/gd.pc > /dev/null << 'EOF'
+          prefix=/usr
+          exec_prefix=${prefix}
+          libdir=${exec_prefix}/lib/x86_64-linux-gnu
+          includedir=${prefix}/include
+
+          Name: gd
+          Description: GD Graphics Library
+          Version: 2.3
+          Libs: -L${libdir} -lgd
+          Cflags: -I${includedir}
+          EOF
+
+          echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
+
+      # Install Ruby
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      # Install dependencies
+      - name: Install gems
+        run: bundle install
+
+      # Run tests
+      - name: Run RSpec
+        run: bundle exec rspec

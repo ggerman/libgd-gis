@@ -28,6 +28,7 @@
   <img src="docs/images/logo-gis.png" width="160" />
 </p>
 
+![CI](https://github.com/ggerman/libgd-gis/actions/workflows/ci.yml/badge.svg)
 
 | Examples | Examples | Examples |
 | :----: | :----: | :--: |
