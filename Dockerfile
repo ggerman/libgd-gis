@@ -22,6 +22,7 @@ COPY . .
 
 COPY Gemfile ./
 RUN bundle install
+RUN gem update --system 4.0.3
 
 # throw errors if Gemfile has been modified since Gemfile.lock
 RUN bundle config --global frozen 1
