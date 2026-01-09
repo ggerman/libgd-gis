@@ -8,3 +8,4 @@ libgd-gis-*.gem
 tmp
 tmp/*
 build.sh
+libgd-gis.garbage/
