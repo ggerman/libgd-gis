@@ -1,8 +1,10 @@
 examples/tmp
 examples/tmp/*
-
+examples/fonts
+examples/fonts/*
 docker-compose.yml
 Dockerfile
 libgd-gis-*.gem
 tmp
 tmp/*
+build.sh
