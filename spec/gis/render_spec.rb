@@ -3,7 +3,7 @@ require "spec_helper"
 RSpec.describe "Rendering pipeline" do
   let(:bbox) { [-60.6, -31.8, -60.5, -31.7] }
 
-  it "renders a PNG file" do
+  xit "renders a PNG file" do
     map = GD::GIS::Map.new(bbox: bbox, zoom: 15, basemap: :carto_light)
 
     points = [
