@@ -59,7 +59,7 @@ module GD
           "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/#{z}/#{y}/#{x}"
 
         # ==============================
-        # STAMEN
+        # STAMEN 503
         # ==============================
         when :stamen_toner
           "https://stamen-tiles.a.ssl.fastly.net/toner/#{z}/#{x}/#{y}.png"
@@ -80,7 +80,7 @@ module GD
           "https://a.tile.opentopomap.org/#{z}/#{x}/#{y}.png"
 
         # ==============================
-        # Wikimedia
+        # Wikimedia 403
         # ==============================
         when :wikimedia
           "https://maps.wikimedia.org/osm-intl/#{z}/#{x}/#{y}.png"
