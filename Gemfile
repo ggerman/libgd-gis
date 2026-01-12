@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "ruby-libgd"
+gem "ruby-libgd", "~> 0.2.1"
 gem "open-uri"
 
 group :development, :test do

@@ -1,0 +1,9 @@
+points:
+  stroke: [0, 0, 0]
+  stroke_width: 1
+  fill: [255, 0, 0]
+  size: 6
+
+labels:
+  color: [0, 0, 0]
+  size: 12
