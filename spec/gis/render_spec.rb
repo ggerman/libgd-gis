@@ -3,6 +3,16 @@ require "spec_helper"
 RSpec.describe "Rendering pipeline" do
   let(:bbox) { [-60.6, -31.8, -60.5, -31.7] }
 
+  let(:icon_path) do
+    File.expand_path("../fixtures/marker.png", __dir__)
+  end
+
+  let(:test_style) do
+    path = File.expand_path("../fixtures/test_style.yml", __dir__)
+    data = YAML.load_file(path)
+    GD::GIS::Style.new(data)
+  end
+
   it "renders a PNG file" do
     map = GD::GIS::Map.new(bbox: bbox, zoom: 15, basemap: :carto_light)
 
@@ -12,10 +22,13 @@ RSpec.describe "Rendering pipeline" do
 
     map.add_points(
       points,
-      lon: ->(p) { p["lon"] },
-      lat: ->(p) { p["lat"] },
-      label: ->(p) { p["name"] }
+      lon:   ->(p) { p["lon"] },
+      lat:   ->(p) { p["lat"] },
+      label: ->(p) { p["name"] },
+      icon:  icon_path
     )
+
+    map.style = test_style
 
     map.render
     map.save("tmp/test.png")

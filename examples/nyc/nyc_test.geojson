@@ -1,0 +1,60 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "leisure": "park", "name": "Central Park" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.9819,40.7681],[-73.9580,40.7681],[-73.9580,40.8005],
+          [-73.9819,40.8005],[-73.9819,40.7681]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "leisure": "park", "name": "Bryant Park" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.9862,40.7535],[-73.9830,40.7535],
+          [-73.9830,40.7563],[-73.9862,40.7563],
+          [-73.9862,40.7535]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "highway": "primary", "name": "Broadway" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-74.0104,40.7075],[-74.0035,40.7203],[-73.9960,40.7352],
+          [-73.9891,40.7502],[-73.9825,40.7652],[-73.9762,40.7801]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "highway": "secondary", "name": "5th Avenue" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-73.9968,40.7099],[-73.9920,40.7325],
+          [-73.9880,40.7552],[-73.9843,40.7779]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "waterway": "river", "name": "Hudson River" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-74.0170,40.7000],[-74.0170,40.7600],[-74.0170,40.8200]
+        ]
+      }
+    }
+  ]
+}
