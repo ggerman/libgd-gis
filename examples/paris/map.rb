@@ -29,7 +29,7 @@ map.add_points(
   lat:   ->(r){ r["lat"].to_f },
   icon:  "eiffel.jpg",
   label: ->(r){ r["name"] },
-  font:  "./fonts/DejaVuSans-Bold.ttf",
+  font:  "./fonts/DejaVuSans-Bold.ttf", # Use a system font or copy a .ttf into your project and reference it by path
   size:  14,
   color: [0,0,0]
 )
@@ -38,7 +38,8 @@ map.render
 map.image.antialias = true
 
 # Title
-font = "./fonts/DejaVuSans-Bold.ttf"
+font = "./fonts/DejaVuSans-Bold.ttf" # Use a system font or copy a .ttf into your project and reference it by path
+
 bg = GD::Color.rgba(0,0,0,100)
 fg = GD::Color.rgb(255,255,255)
 

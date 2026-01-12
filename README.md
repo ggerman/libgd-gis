@@ -41,6 +41,12 @@
 
 ---
 
+> **libgd-gis is evolving very fast**, so some examples may temporarily stop working.  
+> Please report issues or ask for help — feedback is very welcome.  
+> https://github.com/ggerman/libgd-gis/issues or ggerman@gmail.com
+
+--
+
 ## A geospatial raster engine for Ruby.
 
 libgd-gis allows Ruby to render real maps, GeoJSON layers, vector features, and geospatial tiles using a native raster backend powered by **libgd**.
