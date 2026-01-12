@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>libgd-gis — Ruby GIS Renderer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<style>
+body {
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background:#05070d;
+  color:#e5e7eb;
+}
+header {
+  text-align:center;
+  padding:70px 20px 40px;
+}
+header img {
+  width:140px;
+  filter: drop-shadow(0 0 25px rgba(239,68,68,.5));
+}
+h1 { font-size:3rem; margin:20px 0 10px; }
+.tagline { color:#9ca3af; max-width:700px; margin:auto; }
+
+section { max-width:1200px; margin:auto; padding:50px 20px; }
+h2 { border-bottom:1px solid #1f2937; padding-bottom:10px; }
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:24px;
+}
+
+.card {
+  background:#0b1020;
+  border-radius:12px;
+  padding:14px;
+  box-shadow:0 0 0 1px #1f2937, 0 15px 40px rgba(0,0,0,.6);
+}
+.card img {
+  width:100%;
+  border-radius:8px;
+  margin-bottom:10px;
+}
+
+.example {
+  background:#020617;
+  border-radius:12px;
+  box-shadow: inset 0 0 0 1px #1f2937;
+  margin-bottom:30px;
+}
+
+.example h3 {
+  margin:0;
+  padding:12px 16px;
+  background:#0b1020;
+  border-bottom:1px solid #1f2937;
+  font-size:0.9rem;
+  color:#9ca3af;
+}
+
+pre {
+  margin:0;
+  padding:18px;
+  overflow-x:auto;
+  font-size:0.85rem;
+  line-height:1.4;
+}
+
+footer {
+  text-align:center;
+  padding:40px 20px;
+  color:#9ca3af;
+}
+a { color:#ef4444; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="images/logo-gis.png"/>
+  <h1>libgd-gis</h1>
+  <p class="tagline">
+    A pure Ruby GIS rendering engine built on ruby-libgd.
+    Render real maps, GeoJSON, labels and styles directly to PNG — no JS, no QGIS, no Mapbox.
+  </p>
+</header>
+
+<section>
+<h2>Rendered Maps</h2>
+
+<div class="grid">
+  <div class="card"><img src="examples/parana_polygon.png"/><b>Paraná Polygon</b></div>
+  <div class="card"><img src="examples/argentina_museum.png"/><b>Argentina Museums</b></div>
+  <div class="card"><img src="examples/argentina_cities.png"/><b>Argentina Cities</b></div>
+  <div class="card"><img src="examples/tokyo_solarized.png"/><b>Tokyo Solarized</b></div>
+  <div class="card"><img src="examples/parana_carto_dark.png"/><b>Paraná Carto Dark</b></div>
+  <div class="card"><img src="examples/world_peaks-s.png"/><b>World Peaks (Small)</b></div>
+  <div class="card"><img src="examples/tokyo_water_smaller.png"/><b>Tokyo Water</b></div>
+  <div class="card"><img src="examples/parana_tokyo.png"/><b>Paraná Tokyo</b></div>
+  <div class="card"><img src="examples/america.png"/><b>Americas</b></div>
+  <div class="card"><img src="examples/icecream_parana.png"/><b>Ice Cream Paraná</b></div>
+  <div class="card"><img src="examples/world_peaks.png"/><b>World Peaks</b></div>
+  <div class="card"><img src="examples/europe.png"/><b>Europe</b></div>
+  <div class="card"><img src="examples/ramirez_avenue.png"/><b>Avenida Ramírez</b></div>
+  <div class="card"><img src="examples/museos_parana.png"/><b>Museos Paraná</b></div>
+  <div class="card"><img src="examples/nyc.png"/><b>New York City</b></div>
+  <div class="card"><img src="examples/argentina.png"/><b>Argentina</b></div>
+  <div class="card"><img src="examples/paris.png"/><b>Paris</b></div>
+  <div class="card"><img src="examples/tanzania_hydro.png"/><b>Tanzania Hydro</b></div>
+  <div class="card"><img src="examples/asia.png"/><b>Asia Peaks</b></div>
+</div>
+</section>
+
+<section>
+<h2>Full Examples (Ruby)</h2>
+
+<div class="example"><h3>tokyo.rb</h3><pre><code>
+require "pry"
+require "gd/gis"
+
+TOKYO = [139.68, 35.63, 139.82, 35.75]
+
+map = GD::GIS::Map.new(
+  bbox: TOKYO,
+  zoom: 13,
+  basemap: :carto_light
+)
+
+# map.style = GD::GIS::Style::DARK
+# map.style = GD::GIS::Style::SOLARIZED
+map.style = GD::GIS::Style.load("solarized")
+
+# Roads
+map.add_geojson("streets.geojson")
+map.add_geojson("streets.geojson")
+map.add_geojson("streets.geojson")
+
+map.add_geojson("parks.geojson")
+
+# Railways
+# map.add_geojson("railways.geojson")
+# map.add_geojson("railways.geojson")
+# map.add_geojson("railways.geojson")
+
+map.render
+
+font = "../fonts/DejaVuSans-Bold.ttf"
+
+bg = GD::Color.rgba(0, 0, 0, 80)
+fg = GD::Color.rgb(255, 255, 255)
+
+map.image.filled_rectangle(24, 24, 264, 88, bg)
+
+map.image.text(
+  "TOKYO",
+  x: 48,
+  y: 68,
+  size: 32,
+  color: fg,
+  font: font
+)
+
+map.save("tokyo.png")
+</code></pre></div>
+
+<div class="example"><h3>parana.rb</h3><pre><code>
+require "gd/gis"
+
+BBOX = [-60.53, -31.77, -60.51, -31.74]
+
+map = GD::GIS::Map.new(
+  bbox: BBOX,
+  zoom: 15,
+  basemap: :carto_dark
+)
+
+polygon = [
+  [-60.525, -31.750],
+  [-60.520, -31.750],
+  [-60.520, -31.755],
+  [-60.525, -31.755],
+  [-60.525, -31.750]
+]
+
+map.add_polygons(
+  [polygon],
+  fill:   [255, 140, 0, 120],
+  stroke: [0, 0, 0, 200],
+  width:  2
+)
+
+map.render
+map.save("carto_dark.png")
+
+puts "Generated carto_dark.png"
+</code></pre></div>
+
+<div class="example"><h3>paris.rb</h3><pre><code>
+require "gd/gis"
+
+PARIS = [2.25, 48.80, 2.42, 48.90]
+
+map = GD::GIS::Map.new(
+  bbox: PARIS,
+  zoom: 13,
+  basemap: :carto_light
+)
+
+map.style = GD::GIS::Style.load("solarized")
+
+
+# Seine river
+map.add_geojson("data/seine.geojson")
+
+# Parks
+map.add_geojson("data/parks.geojson")
+
+
+pois = [
+  { "name" => "Eiffel Tower", "lon" => 2.2945, "lat" => 48.8584 }
+]
+
+map.add_points(
+  pois,
+  lon:   ->(r){ r["lon"].to_f },
+  lat:   ->(r){ r["lat"].to_f },
+  icon:  "eiffel.jpg",
+  label: ->(r){ r["name"] },
+  font:  "./fonts/DejaVuSans-Bold.ttf",
+  size:  14,
+  color: [0,0,0]
+)
+
+map.render
+map.image.antialias = true
+
+# Title
+font = "./fonts/DejaVuSans-Bold.ttf"
+bg = GD::Color.rgba(0,0,0,100)
+fg = GD::Color.rgb(255,255,255)
+
+map.image.filled_rectangle(30, 30, 330, 100, bg)
+map.image.text("PARIS", x: 60, y: 85, size: 36, color: fg, font: font)
+
+map.save("paris.png")
+</code></pre></div>
+
+<div class="example"><h3>nyc.rb</h3><pre><code>
+require "pry"
+require "gd/gis"
+
+MANHATTAN = [-74.05, 40.70, -73.93, 40.88]
+
+map = GD::GIS::Map.new(
+  bbox: MANHATTAN,
+  zoom: 13,
+  basemap: :carto_light
+)
+
+map.style = GD::GIS::Style.load("dark")
+
+# capas
+map.add_geojson("nyc_test.geojson")
+
+# POIs
+pois = [
+  { "name" => "Manhattan",     "lon" => -73.97, "lat" => 40.78 },
+  { "name" => "Brooklyn",      "lon" => -73.95, "lat" => 40.65 },
+  { "name" => "Queens",        "lon" => -73.85, "lat" => 40.73 },
+  { "name" => "Bronx",         "lon" => -73.86, "lat" => 40.85 },
+  { "name" => "Staten Island", "lon" => -74.15, "lat" => 40.58 }
+]
+
+font = "./fonts/DejaVuSans-Bold.ttf"
+map.add_points(
+  pois,
+  lon:   ->(r){ r["lon"] },
+  lat:   ->(r){ r["lat"] },
+  icon:  "icon.png",
+  label: ->(r){ r["name"] },
+  font:  font,
+  size:  14,
+  color: [0,0,0]
+)
+
+# UNA sola vez
+map.render
+
+map.image.antialias = true
+
+bg = GD::Color.rgba(0,0,0,120)
+fg = GD::Color.rgb(255,255,255)
+
+map.image.filled_rectangle(30, 30, 520, 120, bg)
+map.image.text("NEW YORK CITY", x: 60, y: 95, size: 36, color: fg, font: font)
+
+map.save("nyc.png")
+</code></pre></div>
+
+<div class="example"><h3>world_peaks.rb</h3><pre><code>
+require "json"
+require "gd/gis"
+
+EUROPE = [-15.0, 34.0, 40.0, 72.0]
+
+map = GD::GIS::Map.new(
+  bbox: EUROPE,
+  zoom: 4,
+  basemap: :carto_light
+)
+
+
+peaks = JSON.parse(File.read("picks.json"))
+
+map.add_points(
+  peaks,
+  lon: ->(p) { p["longitude"] },
+  lat: ->(p) { p["latitude"] },
+  icon: "peak.png",
+  label: ->(p) { p["name"] },
+  font: "./fonts/DejaVuSans.ttf",
+  size: 10,
+  color: [0,0,0]
+)
+
+map.render
+map.save("output/europe.png")
+
+puts "Saved output/europe.png"
+</code></pre></div>
+
+</section>
+
+<footer>
+libgd-gis evolves very fast — some examples may temporarily stop working.<br/>
+Please report issues at <a href="https://github.com/ggerman/libgd-gis/issues">GitHub Issues</a>
+or contact <a href="mailto:ggerman@gmail.com">ggerman@gmail.com</a>.
+</footer>
+
+</body>
+</html>
