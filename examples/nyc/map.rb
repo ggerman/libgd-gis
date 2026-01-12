@@ -22,7 +22,8 @@ pois = [
   { "name" => "Staten Island", "lon" => -74.15, "lat" => 40.58 }
 ]
 
-font = "./fonts/DejaVuSans-Bold.ttf"
+font = "./fonts/DejaVuSans-Bold.ttf" # Use a system font or copy a .ttf into your project and reference it by path
+
 map.add_points(
   pois,
   lon:   ->(r){ r["lon"] },
