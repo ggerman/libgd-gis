@@ -36,7 +36,7 @@ map.save("nyc.png")
 
 img = GD::Image.open("nyc.png")
 
-font = "../fonts/DejaVuSans-Bold.ttf"
+font = "../fonts/DejaVuSans-Bold.ttf" # Use a system font or copy a .ttf into your project and reference it by path
 text = "New York"
 
 x = 24
