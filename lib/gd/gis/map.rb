@@ -1,58 +1,91 @@
-require "gd"
 require_relative "basemap"
 require_relative "projection"
-require_relative "geometry"
+require_relative "classifier"
+require_relative "layer_geojson"
 require_relative "layer_points"
 require_relative "layer_lines"
 require_relative "layer_polygons"
-require_relative "layer_geojson"
 
 module GD
   module GIS
     class Map
       TILE_SIZE = 256
 
+      attr_reader :image
+      attr_accessor :style
+
       def initialize(bbox:, zoom:, basemap:)
-        @bbox   = bbox
-        @zoom   = zoom
-        @basemap = Basemap.new(zoom, bbox, basemap)
-        @layers = []
+        @bbox     = bbox
+        @zoom     = zoom
+        @basemap  = Basemap.new(zoom, bbox, basemap)
+
+        # 🔒 DO NOT CHANGE — this is the working GeoJSON pipeline
+        @layers = {
+          motorway: [],
+          primary: [],
+          secondary: [],
+          street: [],
+          minor: [],
+          rail: [],
+          water: [],
+          park: []
+        }
+
+        # 🆕 overlay layers
+        @points_layers   = []
+        @lines_layers    = []
+        @polygons_layers = []
+
+        @style = nil
       end
 
-      # ------------------------------
-      # Layer DSL
-      # ------------------------------
+      # -----------------------------------
+      # GeoJSON input (unchanged)
+      # -----------------------------------
 
-      def add_points(data, lon:, lat:, icon: nil, label: nil, font: nil, size: 12, color: [0,0,0])
-        @layers << PointsLayer.new(
-          data,
-          lon: lon,
-          lat: lat,
-          icon: icon,
-          label: label,
-          font: font,
-          size: size,
-          color: color
-        )
+      def add_geojson(path)
+        features = LayerGeoJSON.load(path)
+
+        features.each do |feature|
+          if Classifier.water?(feature)
+            kind = Classifier.water_kind(feature)
+            @layers[:water] << [kind, feature]
+
+          elsif Classifier.park?(feature)
+            @layers[:park] << feature
+
+          elsif Classifier.rail?(feature)
+            @layers[:rail] << feature
+
+          elsif type = Classifier.road(feature)
+            @layers[type] << feature
+          end
+        end
       end
 
-      def add_lines(features, stroke:, width:)
-        @layers << LinesLayer.new(features, stroke: stroke, width: width)
+      # -----------------------------------
+      # Overlay layers
+      # -----------------------------------
+
+      def add_points(data, **opts)
+        @points_layers << GD::GIS::PointsLayer.new(data, **opts)
       end
 
-      def add_polygons(polygons, fill:, stroke: nil, width: nil)
-        @layers << PolygonsLayer.new(polygons, fill: fill, stroke: stroke, width: width)
+      def add_lines(features, **opts)
+        @lines_layers << GD::GIS::LinesLayer.new(features, **opts)
       end
 
-      def add_geojson(path, **options)
-        @layers << LayerGeoJSON.new(path, options)
+      def add_polygons(polygons, **opts)
+        @polygons_layers << GD::GIS::PolygonsLayer.new(polygons, **opts)
       end
 
-      # ------------------------------
+      # -----------------------------------
       # Rendering
-      # ------------------------------
+      # -----------------------------------
 
-      def render(path = "map.png")
+      def render
+        raise "map.style must be set" unless @style
+
         tiles, x_min, y_min = @basemap.fetch_tiles
 
         xs = tiles.map { |t| t[0] }
@@ -67,42 +100,92 @@ module GD
         origin_x = x_min * TILE_SIZE
         origin_y = y_min * TILE_SIZE
 
-        @img = GD::Image.new(width, height)
-        @img.alpha_blending = true
-        @img.save_alpha = true
+        @image = GD::Image.new(width, height)
+        # @image.antialias = false
 
-        # Draw basemap
+        # Basemap
         tiles.each do |x, y, file|
           tile = GD::Image.open(file)
-          cx = x - x_min
-          cy = y - y_min
-          @img.copy(tile, cx * TILE_SIZE, cy * TILE_SIZE, 0, 0, TILE_SIZE, TILE_SIZE)
+          @image.copy(
+            tile,
+            (x - x_min) * TILE_SIZE,
+            (y - y_min) * TILE_SIZE,
+            0, 0, TILE_SIZE, TILE_SIZE
+          )
         end
-
-        # WebMercator projection → local pixels
-        scale = TILE_SIZE * (2 ** @zoom)
 
         projection = lambda do |lon, lat|
-          x = (lon + 180.0) / 360.0 * scale
-
-          lat_rad = lat * Math::PI / 180.0
-          y = (1.0 - Math.log(Math.tan(lat_rad) + 1.0 / Math.cos(lat_rad)) / Math::PI) / 2.0 * scale
-
-          [
-            (x - origin_x).round,
-            (y - origin_y).round
-          ]
+          x, y = GD::GIS::Projection.lonlat_to_global_px(lon, lat, @zoom)
+          [(x - origin_x).round, (y - origin_y).round]
         end
 
-        # Draw layers
-        @layers.each do |layer|
-          layer.render!(@img, projection)
+        # 1️⃣ Semantic GeoJSON layers (this is what was working)
+        @style.order.each do |kind|
+          draw_layer(kind, projection)
         end
+
+        # 2️⃣ Generic overlays
+        @polygons_layers.each { |l| l.render!(@image, projection) }
+        @lines_layers.each    { |l| l.render!(@image, projection) }
+        @points_layers.each   { |l| l.render!(@image, projection) }
       end
 
       def save(path)
-        @img.save(path)
+        @image.save(path)
       end
+
+      def draw_layer(kind, projection)
+        items = @layers[kind]
+        return if items.nil? || items.empty?
+
+        style =
+          case kind
+          when :street, :primary, :motorway, :secondary, :minor
+            @style.roads[kind]
+          when :rail   then @style.rails
+          when :water  then @style.water
+          when :park   then @style.parks
+          else
+            @style.extra[kind] if @style.respond_to?(:extra)
+          end
+
+        return if style.nil?
+
+        items.each do |item|
+          if kind == :water
+            water_kind, f = item
+
+            width =
+              case water_kind
+              when :river  then 2.5
+              when :stream then 1.5
+              else 1
+              end
+
+            if style[:stroke]
+              color = GD::Color.rgb(*style[:stroke])
+              f.draw(@image, projection, color, width, :water)
+            end
+
+          else
+            f = item
+            geom = f.geometry["type"]
+
+            if geom == "Polygon" || geom == "MultiPolygon"
+              # THIS is the critical fix
+              f.draw(@image, projection, nil, nil, style)
+            else
+              if style[:stroke]
+                color = GD::Color.rgb(*style[:stroke])
+                width = style[:stroke_width] || 1
+                f.draw(@image, projection, color, width)
+              end
+            end
+          end
+        end
+      end
+
+
     end
   end
 end

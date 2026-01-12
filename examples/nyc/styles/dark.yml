@@ -1,0 +1,54 @@
+roads:
+  motorway:
+    stroke: [255, 255, 255]
+    stroke_width: 10
+    fill: [60, 60, 60]
+    fill_width: 6
+
+  primary:
+    stroke: [200, 200, 200]
+    stroke_width: 7
+    fill: [80, 80, 80]
+    fill_width: 4
+
+  street:
+    stroke: [120, 120, 120]
+    stroke_width: 1
+
+rail:
+  stroke: [255, 255, 255]
+  stroke_width: 6
+  fill: [220, 50, 50]
+  fill_width: 4
+  center: [255, 255, 255]
+  center_width: 1
+
+water:
+  glow: [120, 200, 255, 80]
+  glow_width: 6
+  stroke: [60, 140, 230]
+  stroke_width: 3
+
+cuencas:
+    geometry: polygon
+    fill: [0, 80, 200, 80]
+    stroke: [0, 120, 255, 200]
+    width: 1
+
+ramsar:
+    geometry: point
+    color: [0, 200, 255]
+    size: 6
+    halo: [0, 0, 0, 200]
+
+park:
+  fill: [40, 80, 40]
+
+order:
+  - water
+  - park
+  - street
+  - primary
+  - motorway
+  - rail
+  - cuencas
