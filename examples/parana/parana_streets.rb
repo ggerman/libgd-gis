@@ -38,7 +38,8 @@ map.add_points(
   lat: ->(r) { r["Latitud"].to_f },
   icon: "museum.png",
   label: ->(r) { r["nombre"] },
-  font: "./fonts/DejaVuSans.ttf",
+  font: "./fonts/DejaVuSans.ttf", # Use a system font or copy a .ttf into your project and reference it by path
+
   size: 12,
   color: [40,40,40]
 )

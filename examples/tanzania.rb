@@ -1,3 +1,7 @@
+# libgd-gis is evolving very fast, so some examples may temporarily stop working
+# Please report issues or ask for help — feedback is very welcome
+# https://github.com/ggerman/libgd-gis/issues or ggerman@gmail.com
+
 require "json"
 require "gd/gis"
 
