@@ -1,0 +1,40 @@
+roads:
+  motorway:
+    stroke: [255, 255, 255]
+    stroke_width: 10
+    fill: [60, 60, 60]
+    fill_width: 6
+
+  primary:
+    stroke: [200, 200, 200]
+    stroke_width: 7
+    fill: [80, 80, 80]
+    fill_width: 4
+
+  street:
+    stroke: [120, 120, 120]
+    stroke_width: 1
+
+rail:
+  stroke: [255, 255, 255]
+  stroke_width: 6
+  fill: [220, 50, 50]
+  fill_width: 4
+  center: [255, 255, 255]
+  center_width: 1
+
+water:
+  fill: [120, 180, 255]
+  fill_width: 4
+  stroke: [80, 140, 220]
+
+park:
+  fill: [40, 80, 40]
+
+order:
+  - water
+  - park
+  - street
+  - primary
+  - motorway
+  - rail

@@ -32,7 +32,8 @@
 
 | Examples | Examples | Examples |
 | :----: | :----: | :--: |
-| <img src="examples/nyc/nyc.png" height="250"> | <img src="examples/tokyo/tokyo.png" height="250"> | <img src="examples/parana/parana.png" height="250"> | 
+| <img src="docs/examples/parana.png" height="250"> | <img src="docs/examples/nyc.png" height="250"> | <img src="docs/examples/paris.png" height="250"> |
+| <img src="examples/nyc/nyc.png" height="250"> | <img src="docs/examples/tokyo_solarized.png" height="250"> | <img src="examples/parana/parana.png" height="250"> |
 | <img src="docs/examples/america.png" height="250"> | <img src="docs/examples/argentina_museum.png" height="250"> | <img src="docs/examples/museos_parana.png" height="250"> |
 | <img src="docs/examples/asia.png" height="250"> | <img src="docs/examples/europe.png" height="250"> | <img src="docs/examples/icecream_parana.png" height="250"> |
 | <img src="docs/examples/argentina_cities.png" height="250"> | <img src="docs/examples/tanzania_hydro.png" height="250"> | <img src="docs/examples/parana_polygon.png" height="250"> |
