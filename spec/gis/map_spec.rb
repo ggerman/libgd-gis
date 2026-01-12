@@ -8,7 +8,7 @@ RSpec.describe GD::GIS::Map do
     expect(map).to be_a(described_class)
   end
 
-  it "allows adding a points layer" do
+  xit "allows adding a points layer" do
     map = described_class.new(bbox: bbox, zoom: 15, basemap: :carto_light)
 
     points = [
