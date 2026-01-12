@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "libgd-gis"
-  s.version     = "0.2.3"
+  s.version     = "0.2.4"
   s.summary     = "Geospatial raster rendering for Ruby using libgd"
   s.description = "A native GIS raster engine for Ruby built on libgd. Render maps, GeoJSON, heatmaps and tiles."
   s.authors     = ["Germán Alberto Giménez Silva"]
