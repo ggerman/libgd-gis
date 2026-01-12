@@ -101,7 +101,7 @@ module GD
         origin_y = y_min * TILE_SIZE
 
         @image = GD::Image.new(width, height)
-        @image.antialias(false)
+        # @image.antialias = false
 
         # Basemap
         tiles.each do |x, y, file|
