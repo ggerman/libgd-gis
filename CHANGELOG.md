@@ -1,3 +1,98 @@
+# Changelog
+
+## [v0.2.5] — CRS, Ontology & Multi-source GIS
+
+This release transforms libgd-gis from an OSM-only renderer into a
+true multi-source GIS engine.
+
+## ✨ Added
+
+### CRS Normalization Layer
+
+A CRS middleware was added so that all incoming geometries are normalized
+to **CRS84 (lon,lat)** before rendering.
+
+Supported inputs:
+- `urn:ogc:def:crs:OGC:1.3:CRS84`
+- `EPSG:4326`
+- `EPSG:3857` (Web Mercator)
+
+Implemented in `CRS::Normalizer` and automatically applied in `LayerGeoJSON`.
+
+This allows loading GeoJSON from:
+- OpenStreetMap
+- QGIS exports
+- IGN Argentina
+- Any WGS84 or Mercator dataset
+
+without breaking projection or map alignment.
+
+### Ontology System (Semantic Layer)
+
+A new ontology system was introduced to decouple **data source** from
+**map meaning**.
+
+Instead of reading OSM-specific tags (`waterway`, `highway`, etc),
+features are now classified by semantic meaning:
+
+:water
+:roads
+:parks
+:rails
+
+regardless of their source.
+
+Implemented in:
+- `Ontology` (`lib/gd/gis/ontology.rb`)
+- `ontology.yml` (semantic dictionary)
+
+Example:
+
+| Source | Raw value        | Ontology |
+| ------ | ---------------- | -------- |
+| OSM    | `waterway=river` | `:water` |
+| IGN    | `objeto=Canal`   | `:water` |
+| QGIS   | `type=drainage`  | `:water` |
+
+This makes it possible to mix IGN, OSM and QGIS layers in the same map.
+
+### Official IGN Argentina Support
+
+libgd-gis can now render Argentina’s official hydrology datasets
+from the Instituto Geográfico Nacional (IGN), including:
+
+- Rivers
+- Streams
+- Canals
+- Drainage networks
+- Delta systems
+
+using GeoJSON exports and ontology-based classification.
+
+## 🛠 Changed
+
+- `LayerGeoJSON` now:
+  - Detects CRS
+  - Reprojects coordinates
+  - Classifies features through ontology
+  - Produces `Feature` objects with `feature.layer`
+
+- The rendering pipeline now uses semantic layers instead of
+source-specific tags.
+
+## 🧠 Architecture
+
+GeoJSON
+→ CRS Normalizer
+→ Ontology
+→ Feature(layer)
+→ Map
+→ Style
+→ Raster
+
+This is the same architecture used by professional GIS systems
+(QGIS, ArcGIS, Mapbox).
+
 # 🗺️ libgd-gis 0.2.4 — Changelog
 
 **Release date:** 2026-01-12

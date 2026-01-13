@@ -1,8 +1,7 @@
 module GD
   module GIS
     class PointsLayer
-      def initialize(data, lon:, lat:, icon: nil, label: nil, font: nil, size: 12, color: [0,0,0])
-
+      def initialize(data, lon:, lat:, icon:, label: nil, font: nil, size: 12, color: [0,0,0])
         @data = data
         @lon = lon
         @lat = lat

@@ -1,11 +1,12 @@
 module GD
   module GIS
     class Feature
-      attr_reader :geometry, :properties
+      attr_reader :geometry, :properties, :layer
 
-      def initialize(geometry, properties)
+      def initialize(geometry, properties, layer = nil)
         @geometry   = geometry
         @properties = properties || {}
+        @layer      = layer
       end
 
       # -------------------------------------------------

@@ -1,0 +1,23 @@
+water:
+  ign:
+    objeto:
+      - canal
+      - río
+      - arroyo
+      - embalse
+      - laguna
+      - dique
+      - represa
+    gna:
+      - canal
+      - río
+      - arroyo
+      - embalse
+      - laguna
+
+  natural_earth:
+    featurecla:
+      - river
+      - lake
+      - reservoir
+      - riverbank
