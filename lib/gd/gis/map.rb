@@ -47,18 +47,27 @@ module GD
         features = LayerGeoJSON.load(path)
 
         features.each do |feature|
-          if Classifier.water?(feature)
-            kind = Classifier.water_kind(feature)
+          case feature.layer
+          when :water
+            # optional: detect river vs canal from properties
+            kind =
+              case (feature.properties["objeto"] || feature.properties["waterway"]).to_s.downcase
+              when /river|río/   then :river
+              when /stream|arroyo/ then :stream
+              else :minor
+              end
+
             @layers[:water] << [kind, feature]
 
-          elsif Classifier.park?(feature)
+          when :roads
+            # map to style categories if you want later
+            @layers[:street] << feature
+
+          when :parks
             @layers[:park] << feature
 
-          elsif Classifier.rail?(feature)
-            @layers[:rail] << feature
-
-          elsif type = Classifier.road(feature)
-            @layers[type] << feature
+          else
+            # ignore unclassified for now
           end
         end
       end
@@ -101,7 +110,7 @@ module GD
         origin_y = y_min * TILE_SIZE
 
         @image = GD::Image.new(width, height)
-        # @image.antialias = false
+        @image.antialias = false
 
         # Basemap
         tiles.each do |x, y, file|
