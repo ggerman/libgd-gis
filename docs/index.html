@@ -74,6 +74,53 @@ footer {
   color:#9ca3af;
 }
 a { color:#ef4444; }
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5,7,13,0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo {
+  width: 32px;
+}
+
+.nav-title {
+  font-weight: 600;
+  letter-spacing: .05em;
+}
+
+.nav-links a {
+  margin-left: 18px;
+  text-decoration: none;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.nav-links a:hover {
+  color: #ef4444;
+}
+
+.nav-links .contact {
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #ef4444;
+  color: white;
+}
+
 </style>
 </head>
 
