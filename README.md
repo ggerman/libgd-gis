@@ -29,6 +29,10 @@
 </p>
 
 ![CI](https://github.com/ggerman/libgd-gis/actions/workflows/ci.yml/badge.svg)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6bc3e7d6118d47e6959b16690b815909)](https://www.codacy.com/app/libgd-gis/libgd-gis?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=libgd-gis/libgd-gis&amp;utm_campaign=Badge_Grade)
+[![Test Coverage](https://coveralls.io/repos/githublibgd-gis/libgd-gis/badge.svg?branch=master)](https://coveralls.io/github/libgd-gis/libgd-gis?branch=master)
+[![Gem Version](https://img.shields.io/gem/v/libgd-gis.svg)](https://rubygems.org/gems/libgd-gis)
+
 
 | Examples | Examples | Examples |
 | :----: | :----: | :--: |
