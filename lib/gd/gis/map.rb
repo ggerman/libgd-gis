@@ -36,6 +36,10 @@ module GD
         @lines_layers    = []
         @polygons_layers = []
 
+        @dynamic_points = []
+        @dynamic_lines  = []
+        @dynamic_polys  = []
+
         @style = nil
       end
 
@@ -77,11 +81,35 @@ module GD
       # -----------------------------------
 
       def add_points(data, **opts)
-        @points_layers << GD::GIS::PointsLayer.new(data, **opts)
+        layer = GD::GIS::PointsLayer.new(data, **opts)
+        @points_layers << layer
+        layer
       end
 
-      def add_lines(features, **opts)
-        @lines_layers << GD::GIS::LinesLayer.new(features, **opts)
+      def add_line(coords, **opts)
+        feature = {
+          "type" => "Feature",
+          "geometry" => {
+            "type" => "LineString",
+            "coordinates" => coords
+          },
+          "properties" => {}
+        }
+
+        add_lines([feature], **opts)
+      end
+
+      def add_multiline(lines, **opts)
+        feature = {
+            "type" => "Feature",
+            "geometry" => {
+                      "type" => "MultiLineString",
+                      "coordinates" => lines
+            },
+            "properties" => []
+          }
+
+        add_lines([feature], **opts)
       end
 
       def add_polygons(polygons, **opts)
@@ -123,20 +151,26 @@ module GD
           )
         end
 
-        projection = lambda do |lon, lat|
+        @projection = lambda do |lon, lat|
           x, y = GD::GIS::Projection.lonlat_to_global_px(lon, lat, @zoom)
           [(x - origin_x).round, (y - origin_y).round]
         end
 
         # 1️⃣ Semantic GeoJSON layers (this is what was working)
         @style.order.each do |kind|
-          draw_layer(kind, projection)
+          draw_layer(kind, @projection)
         end
 
         # 2️⃣ Generic overlays
-        @polygons_layers.each { |l| l.render!(@image, projection) }
-        @lines_layers.each    { |l| l.render!(@image, projection) }
-        @points_layers.each   { |l| l.render!(@image, projection) }
+        @polygons_layers.each { |l| l.render!(@image, @projection) }
+        @lines_layers.each    { |l| l.render!(@image, @projection) }
+        @points_layers.each   { |l| l.render!(@image, @projection) }
+
+        @dynamic_polys.each  { |l| l.render!(@image, @projection) }
+        @dynamic_lines.each  { |l| l.render!(@image, @projection) }
+        @dynamic_points.each { |l| l.render!(@image, @projection) }
+
+        @image
       end
 
       def save(path)
@@ -173,7 +207,7 @@ module GD
 
             if style[:stroke]
               color = GD::Color.rgb(*style[:stroke])
-              f.draw(@image, projection, color, width, :water)
+              f.draw(@image, @projection, color, width, :water)
             end
 
           else
@@ -182,18 +216,67 @@ module GD
 
             if geom == "Polygon" || geom == "MultiPolygon"
               # THIS is the critical fix
-              f.draw(@image, projection, nil, nil, style)
+              f.draw(@image, @projection, nil, nil, style)
             else
               if style[:stroke]
                 color = GD::Color.rgb(*style[:stroke])
                 width = style[:stroke_width] || 1
-                f.draw(@image, projection, color, width)
+                f.draw(@image, @projection, color, width)
               end
             end
           end
         end
       end
 
+      def clear_dynamic_layers
+        @dynamic_points.clear
+        @dynamic_lines.clear
+        @dynamic_polys.clear
+      end
+
+      def add_dynamic_point(data, **opts)
+        @dynamic_points << GD::GIS::PointsLayer.new(data, **opts)
+      end
+
+      def add_dynamic_line(coords, **opts)
+        feature = {
+          "type" => "Feature",
+          "geometry" => {
+            "type" => "LineString",
+            "coordinates" => coords
+          },
+          "properties" => {}
+        }
+        @dynamic_lines << GD::GIS::LinesLayer.new([feature], **opts)
+      end
+
+      def render_base
+        render
+        @base_image = @image
+      end
+
+      def render_with_base
+        img = GD::Image.new(@base_image.width, @base_image.height)
+        img.copy(@base_image, 0,0, 0,0, @base_image.width, @base_image.height)
+
+        @points_layers.each   { |l| l.render!(img, @projection) }
+        @lines_layers.each    { |l| l.render!(img, @projection) }
+        @polygons_layers.each{ |l| l.render!(img, @projection) }
+
+        img
+      end
+
+      private
+
+      def add_lines(features, **opts)
+        stroke = opts.delete(:color) || opts.delete(:stroke)
+        width = opts.delete(:width) || opts.delete(:stroke_width)
+
+        raise ArgumentError, "missing :color or :stroke" unless stroke
+        raise ArgumentError, "missing :width" unless width
+
+        @lines_layers << GD::GIS::LinesLayer.new(features, :stroke => stroke, :width => width)
+      end
 
     end
   end

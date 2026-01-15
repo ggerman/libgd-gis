@@ -1,6 +1,8 @@
 module GD
   module GIS
     class PointsLayer
+      attr_accessor :data, :size
+
       def initialize(data, lon:, lat:, icon:, label: nil, font: nil, size: 12, color: [0,0,0])
         @data = data
         @lon = lon
@@ -15,6 +17,7 @@ module GD
         @label = label
         @font  = font
         @size  = size
+        @data = data
         @color = color
 
         @icon.alpha_blending = true

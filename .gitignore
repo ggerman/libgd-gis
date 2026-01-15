@@ -9,3 +9,6 @@ tmp
 tmp/*
 build.sh
 libgd-gis.garbage/
+*.geojson
+# Example GIS datasets
+examples/animation/geojson/

@@ -1,3 +1,7 @@
+# ============================================================
+#  WATER
+# ============================================================
+
 water:
   ign:
     objeto:
@@ -21,3 +25,243 @@ water:
       - lake
       - reservoir
       - riverbank
+
+  osm:
+    waterway:
+      - river
+      - stream
+      - canal
+      - drain
+      - ditch
+    natural:
+      - water
+      - lake
+      - reservoir
+      - wetland
+      - bay
+      - strait
+
+# ============================================================
+#  ROADS
+# ============================================================
+
+roads:
+  ign:
+    objeto:
+      - autopista
+      - ruta
+      - camino
+      - calle
+      - avenida
+
+  natural_earth:
+    featurecla:
+      - road
+      - highway
+
+  osm:
+    highway:
+      - motorway
+      - motorway_link
+      - trunk
+      - trunk_link
+      - primary
+      - primary_link
+      - secondary
+      - secondary_link
+      - tertiary
+      - tertiary_link
+      - residential
+      - unclassified
+      - service
+      - living_street
+      - pedestrian
+      - road
+      - busway
+      - track
+
+# ============================================================
+#  RAIL
+# ============================================================
+
+rail:
+  osm:
+    railway:
+      - rail
+      - subway
+      - light_rail
+      - tram
+      - monorail
+      - funicular
+
+# ============================================================
+#  PARKS & GREEN
+# ============================================================
+
+park:
+  ign:
+    objeto:
+      - parque
+      - plaza
+      - reserva
+
+  natural_earth:
+    featurecla:
+      - park
+      - protected_area
+
+  osm:
+    leisure:
+      - park
+      - garden
+      - pitch
+      - playground
+      - recreation_ground
+      - golf_course
+    landuse:
+      - grass
+      - meadow
+      - forest
+    natural:
+      - wood
+      - scrub
+      - heath
+      - grassland
+
+# ============================================================
+#  BUILDINGS
+# ============================================================
+
+buildings:
+  ign:
+    objeto:
+      - edificio
+      - hospital
+      - escuela
+
+  osm:
+    building:
+      - yes
+      - residential
+      - commercial
+      - industrial
+      - retail
+      - hospital
+      - school
+      - church
+      - cathedral
+      - university
+      - public
+      - civic
+      - apartments
+
+# ============================================================
+#  POI (Points of Interest)
+# ============================================================
+
+poi:
+  osm:
+    amenity:
+      - hospital
+      - school
+      - university
+      - cafe
+      - restaurant
+      - bar
+      - pharmacy
+      - bank
+      - atm
+      - police
+      - fire_station
+      - library
+      - cinema
+      - theatre
+      - post_office
+      - fuel
+    shop:
+      - supermarket
+      - bakery
+      - convenience
+      - clothes
+      - mall
+      - department_store
+      - butcher
+      - greengrocer
+      - fast_food
+
+# ============================================================
+#  TRANSPORT
+# ============================================================
+
+transport:
+  osm:
+    aeroway:
+      - aerodrome
+      - runway
+      - taxiway
+      - apron
+      - terminal
+    public_transport:
+      - station
+      - stop_position
+      - platform
+
+# ============================================================
+#  NATURAL FEATURES
+# ============================================================
+
+natural:
+  natural_earth:
+    featurecla:
+      - mountain
+      - peak
+      - hill
+      - volcano
+
+  osm:
+    natural:
+      - peak
+      - hill
+      - volcano
+      - ridge
+      - cliff
+      - dune
+
+# ============================================================
+#  LANDUSE
+# ============================================================
+
+landuse:
+  osm:
+    landuse:
+      - residential
+      - commercial
+      - industrial
+      - retail
+      - farmland
+      - forest
+      - grass
+      - meadow
+      - quarry
+      - cemetery
+      - landfill
+      - recreation_ground
+roads:
+  osm_geofabrik:
+    fclass:
+      - motorway
+      - motorway_link
+      - trunk
+      - trunk_link
+      - primary
+      - primary_link
+      - secondary
+      - secondary_link
+      - tertiary
+      - tertiary_link
+      - residential
+      - unclassified
+      - service
+      - living_street
+      - pedestrian
+      - road
