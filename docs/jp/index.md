@@ -1,7 +1,7 @@
 <div class="doc-header">
 
   <div class="nav-left">
-    <img src="../images/logo-gis.png" class="nav-logo"/>
+    <img src="../images/logo-gis.png" class="nav-logo" width="250"/>
     <span class="nav-title">libgd-gis</span>
   </div>
 
