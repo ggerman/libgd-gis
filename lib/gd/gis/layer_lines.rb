@@ -1,35 +1,43 @@
 module GD
   module GIS
     class LinesLayer
-      def initialize(features, stroke:, width:)
-        @features = features
+      attr_accessor :debug
+
+      def initialize(lines, stroke:, width:)
+        @lines  = lines
         @stroke = stroke
-        @width = width
+        @width  = width
+        @debug  = false
       end
 
       def render!(img, projection)
-        @features.each do |f|
-          geom = f["geometry"]
+        @lines.each do |line|
+          raise "Invalid line: #{line.inspect}" unless valid_line?(line)
 
-          case geom["type"]
-          when "LineString"
-            draw_line(geom["coordinates"], img, projection)
-          when "MultiLineString"
-            geom["coordinates"].each do |line|
-              draw_line(line, img, projection)
-            end
+          pts = line.map do |lng, lat|
+            projection.call(lng, lat)
+          end
+
+          color = @debug ? ColorHelpers.random_vivid : @stroke
+
+          pts.each_cons(2) do |a, b|
+            img.line(
+              a[0], a[1],
+              b[0], b[1],
+              color,
+              thickness: @width
+            )
           end
         end
       end
 
-      def draw_line(coords, img, projection)
-        pts = coords.map { |p| projection.call(p[0], p[1]) }
+      private
 
-        (0...pts.size-1).each do |i|
-          x1,y1 = pts[i]
-          x2,y2 = pts[i+1]
-          img.line(x1,y1,x2,y2,@stroke, thickness: @width)
-        end
+      def valid_line?(line)
+        line.is_a?(Array) &&
+          line.size >= 2 &&
+          line.first.is_a?(Array) &&
+          line.first.size == 2
       end
     end
   end
