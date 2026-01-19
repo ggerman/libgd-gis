@@ -116,50 +116,97 @@ gem install libgd-gis
 Render hydroelectric plants from a GeoJSON file:
 
 ```ruby
-require "json"
+# libgd-gis is evolving very fast, so some examples may temporarily stop working.
+# Please report issues or ask for help — feedback is very welcome.
+# https://github.com/ggerman/libgd-gis/issues or ggerman@gmail.com
+
 require "gd/gis"
+require "gd"
 
-# ---------------------------
-# Bounding box mundial
-# ---------------------------
-AMERICA = [-170, -60, -30, 75]
+TOKYO = [139.68, 35.63, 139.82, 35.75]
 
-# ---------------------------
-# Crear mapa
-# ---------------------------
 map = GD::GIS::Map.new(
-  bbox: AMERICA,
-  zoom: 4,
-  basemap: :carto_light
+  bbox: TOKYO,
+  zoom: 13,
+  basemap: :esri_satellite
 )
 
-# Cargar datos
-# ---------------------------
-peaks = JSON.parse(File.read("picks.json"))
+map.style = GD::GIS::Style.load("solarized")
 
-# ---------------------------
-# Agregar capa de puntos
-# ---------------------------
-map.add_points(
-  peaks,
-  lon: ->(p) { p["longitude"] },
-  lat: ->(p) { p["latitude"] },
-  icon: "peak.png",
-  label: ->(p) { p["name"] },
-  font: "./fonts/DejaVuSans.ttf",
-  size: 10,
-  color: [0,0,0]
-)
+map.add_geojson("railways.geojson")
+map.add_geojson("parks.geojson")
+map.add_geojson("wards.geojson")
 
-# ---------------------------
-# Renderizar y guardar
-# ---------------------------
 map.render
-map.save("output/america.png")
+map.save("tokyo.png")
 
-puts "Saved output/america.png"
+# --------------------------
+# Overlay label
+# --------------------------
+
+img = GD::Image.open("tokyo.png")
+
+font = "../fonts/DejaVuSans-Bold.ttf"
+text = "TOKYO"
+
+x = 24
+y = 24
+w = 240
+h = 64
+
+# Fondo
+img.filled_rectangle(x, y, x + w, y + h, [0,0,0])
+
+# Texto
+img.text(
+  text,
+  x: x + 24,
+  y: y + 44,
+  size: 32,
+  color: [255,255,255],
+  font: font
+)
+
+img.save("tokyo.png")
+
 
 ```
+---
+## Animations & Tracking (Alpha)
+
+libgd-gis is designed not only for static map rendering, but also with a strong focus on
+map manipulation and animated outputs.
+
+One of its main goals is to enable animated map generation, including:
+
+- Route and track visualization
+- Step-by-step geospatial playback
+- Simulated or real-time GPS tracking
+- Time-based movement over geographic layers
+
+This makes libgd-gis suitable for use cases such as real-time geolocation tracking,
+mobility analysis, and geographic storytelling.
+
+Animated map generation is already possible, including animated GIFs showing movement
+across cities (e.g. Manhattan, Buenos Aires).
+
+However, animation support is currently in **alpha (alpha-1)**.
+
+The animation pipeline is under active development and will be released as a stable feature
+only after extensive testing, performance optimization, and API stabilization.
+
+During this phase:
+- Animation-related APIs may change
+- Examples may evolve
+- Feedback and testing are highly encouraged
+
+The long-term goal is to provide a reliable and deterministic geospatial animation engine,
+fully integrated with the libgd-gis rendering pipeline and powered by ruby-libgd.
+
+| Examples | Examples | Examples |
+| :----: | :----: | :--: |
+| <img src="docs/examples/alpha-1/nyc_car_plane_label_opt.gif" height="250"> | <img src="docs/examples/alpha-1/pacman_buenos-aires.gif" height="250"> | <img src="docs/examples/alpha-1/pacman_manhattan-1.gif" height="250"> |
+| <img src="docs/examples/alpha-1/pacman_manhattan-car.gif" height="250"> | | |
 
 ---
 
