@@ -8,51 +8,130 @@ require_relative "layer_polygons"
 
 module GD
   module GIS
+    attr_accessor :debug
+
     class Map
       TILE_SIZE = 256
 
       attr_reader :image
+      attr_reader :layers
       attr_accessor :style
 
-      def initialize(bbox:, zoom:, basemap:)
-        @bbox     = bbox
-        @zoom     = zoom
-        @basemap  = Basemap.new(zoom, bbox, basemap)
+      def initialize(
+        bbox:,
+        zoom:,
+        basemap:,
+        width: nil,
+        height: nil,
+        crs: nil,
+	      fitted_bbox: false
+      )
+        # --------------------------------------------------
+        # 1. Basic input validation
+        # --------------------------------------------------
+        raise ArgumentError, "bbox must be [min_lng, min_lat, max_lng, max_lat]" unless
+          bbox.is_a?(Array) && bbox.size == 4
 
-        # 🔒 DO NOT CHANGE — this is the working GeoJSON pipeline
+        raise ArgumentError, "zoom must be an Integer" unless zoom.is_a?(Integer)
+
+        if (width && !height) || (!width && height)
+          raise ArgumentError, "width and height must be provided together"
+        end
+
+        @zoom   = zoom
+        @width  = width
+        @height = height
+
+        # --------------------------------------------------
+        # 2. CRS normalization (input → WGS84 lon/lat)
+        # --------------------------------------------------
+        if crs
+          normalizer = GD::GIS::CRS::Normalizer.new(crs)
+
+          min_lng, min_lat = normalizer.normalize(bbox[0], bbox[1])
+          max_lng, max_lat = normalizer.normalize(bbox[2], bbox[3])
+
+          bbox = [min_lng, min_lat, max_lng, max_lat]
+        end
+
+        # --------------------------------------------------
+        # 3. Final bbox (viewport-aware if width/height)
+        # --------------------------------------------------
+        @bbox =
+          if width && height && !fitted_bbox
+            GD::GIS::Geometry.viewport_bbox(
+              bbox: bbox,
+              zoom: zoom,
+              width: width,
+              height: height
+            )
+          else
+            bbox
+          end
+
+        # --------------------------------------------------
+        # 4. Basemap (uses FINAL bbox)
+        # --------------------------------------------------
+        @basemap = GD::GIS::Basemap.new(zoom, @bbox, basemap)
+
+        # --------------------------------------------------
+        # 5. Legacy semantic layers (REQUIRED by render)
+        # --------------------------------------------------
         @layers = {
-          motorway: [],
-          primary: [],
+          motorway:  [],
+          primary:   [],
           secondary: [],
-          street: [],
-          minor: [],
-          rail: [],
-          water: [],
-          park: []
+          street:    [],
+          minor:     [],
+          rail:      [],
+          water:     [],
+          park:      []
         }
 
-        # 🆕 overlay layers
+        # Optional alias (semantic clarity, no behavior change)
+        @road_layers = @layers
+
+        # --------------------------------------------------
+        # 6. Overlay layers (generic)
+        # --------------------------------------------------
         @points_layers   = []
         @lines_layers    = []
         @polygons_layers = []
 
+        # --------------------------------------------------
+        # 7. Style
+        # --------------------------------------------------
         @style = nil
+
+	      @debug = false
+      end
+
+      def features_by_layer(layer)
+        return [] unless @layers[layer]
+
+        @layers[layer].map do |item|
+          item.is_a?(Array) ? item.last : item
+        end
+      end
+
+      def features
+        @layers.values.flatten.map do |item|
+          item.is_a?(Array) ? item.last : item
+        end
       end
 
       # -----------------------------------
-      # GeoJSON input (unchanged)
+      # GeoJSON input (unchanged behavior)
       # -----------------------------------
-
       def add_geojson(path)
         features = LayerGeoJSON.load(path)
 
         features.each do |feature|
           case feature.layer
           when :water
-            # optional: detect river vs canal from properties
             kind =
               case (feature.properties["objeto"] || feature.properties["waterway"]).to_s.downcase
-              when /river|río/   then :river
+              when /river|río/     then :river
               when /stream|arroyo/ then :stream
               else :minor
               end
@@ -60,14 +139,20 @@ module GD
             @layers[:water] << [kind, feature]
 
           when :roads
-            # map to style categories if you want later
             @layers[:street] << feature
 
           when :parks
             @layers[:park] << feature
 
+          when :track
+            # elegí una:
+            @layers[:minor]  << feature
+            # o @layers[:street] << feature
           else
-            # ignore unclassified for now
+            geom_type = feature.geometry["type"]
+            if geom_type == "LineString" || geom_type == "MultiLineString"
+              @layers[:minor] << feature
+            end
           end
         end
       end
@@ -75,7 +160,6 @@ module GD
       # -----------------------------------
       # Overlay layers
       # -----------------------------------
-
       def add_points(data, **opts)
         @points_layers << GD::GIS::PointsLayer.new(data, **opts)
       end
@@ -89,10 +173,19 @@ module GD
       end
 
       # -----------------------------------
-      # Rendering
+      # Rendering (LEGACY, UNCHANGED)
       # -----------------------------------
-
       def render
+        raise "map.style must be set" unless @style
+
+        if @width && @height
+          render_viewport
+        else
+          render_tiles
+        end
+      end
+      
+      def render_tiles
         raise "map.style must be set" unless @style
 
         tiles, x_min, y_min = @basemap.fetch_tiles
@@ -128,12 +221,81 @@ module GD
           [(x - origin_x).round, (y - origin_y).round]
         end
 
-        # 1️⃣ Semantic GeoJSON layers (this is what was working)
+        # 1️⃣ GeoJSON semantic layers
         @style.order.each do |kind|
           draw_layer(kind, projection)
         end
 
         # 2️⃣ Generic overlays
+        @polygons_layers.each { |l| l.render!(@image, projection) }
+        @lines_layers.each    { |l| l.render!(@image, projection) }
+        @points_layers.each   { |l| l.render!(@image, projection) }
+      end
+
+      def render_viewport
+        raise "map.style must be set" unless @style
+
+        @image = GD::Image.new(@width, @height)
+        @image.antialias = false
+
+        # --------------------------------------------------
+        # 1. Compute global pixel bbox
+        # --------------------------------------------------
+        min_lng, min_lat, max_lng, max_lat = @bbox
+
+        x1, y1 = GD::GIS::Projection.lonlat_to_global_px(min_lng, max_lat, @zoom)
+        x2, y2 = GD::GIS::Projection.lonlat_to_global_px(max_lng, min_lat, @zoom)
+
+        # --------------------------------------------------
+        # 2. Fetch tiles
+        # --------------------------------------------------
+        tiles, = @basemap.fetch_tiles
+
+        # --------------------------------------------------
+        # 3. Draw tiles clipped to viewport
+        # --------------------------------------------------
+        tiles.each do |x, y, file|
+          tile = GD::Image.open(file)
+
+          tile_x = x * TILE_SIZE
+          tile_y = y * TILE_SIZE
+
+          dst_x = tile_x - x1
+          dst_y = tile_y - y1
+
+          src_x = [0, -dst_x].max
+          src_y = [0, -dst_y].max
+
+          draw_w = [TILE_SIZE - src_x, @width  - dst_x - src_x].min
+          draw_h = [TILE_SIZE - src_y, @height - dst_y - src_y].min
+
+          next if draw_w <= 0 || draw_h <= 0
+
+          @image.copy(
+            tile,
+            dst_x + src_x,
+            dst_y + src_y,
+            src_x,
+            src_y,
+            draw_w,
+            draw_h
+          )
+        end
+
+        # --------------------------------------------------
+        # 4. Projection (viewport version)
+        # --------------------------------------------------
+        projection = lambda do |lon, lat|
+          GD::GIS::Geometry.project(lon, lat, @bbox, @zoom)
+        end
+
+        # --------------------------------------------------
+        # 5. REUSE the same render pipeline
+        # --------------------------------------------------
+        @style.order.each do |kind|
+          draw_layer(kind, projection)
+        end
+
         @polygons_layers.each { |l| l.render!(@image, projection) }
         @lines_layers.each    { |l| l.render!(@image, projection) }
         @points_layers.each   { |l| l.render!(@image, projection) }
@@ -151,9 +313,12 @@ module GD
           case kind
           when :street, :primary, :motorway, :secondary, :minor
             @style.roads[kind]
-          when :rail   then @style.rails
-          when :water  then @style.water
-          when :park   then @style.parks
+          when :rail
+            @style.rails
+          when :water
+            @style.water
+          when :park
+            @style.parks
           else
             @style.extra[kind] if @style.respond_to?(:extra)
           end
@@ -173,20 +338,25 @@ module GD
 
             if style[:stroke]
               color = GD::Color.rgb(*style[:stroke])
+
+              color = GD::GIS::ColorHelpers.random_vivid if @debug
+
               f.draw(@image, projection, color, width, :water)
             end
-
           else
             f = item
             geom = f.geometry["type"]
 
             if geom == "Polygon" || geom == "MultiPolygon"
-              # THIS is the critical fix
               f.draw(@image, projection, nil, nil, style)
             else
               if style[:stroke]
                 color = GD::Color.rgb(*style[:stroke])
-                width = style[:stroke_width] || 1
+
+                color = GD::GIS::ColorHelpers.random_vivid if @debug
+
+                width = style[:stroke_width] ? style[:stroke_width].round : 1
+                width = 1 if width < 1
                 f.draw(@image, projection, color, width)
               end
             end
@@ -194,7 +364,7 @@ module GD
         end
       end
 
-
     end
   end
 end
+

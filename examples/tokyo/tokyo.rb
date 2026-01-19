@@ -1,3 +1,7 @@
+# libgd-gis is evolving very fast, so some examples may temporarily stop working.
+# Please report issues or ask for help — feedback is very welcome.
+# https://github.com/ggerman/libgd-gis/issues or ggerman@gmail.com
+
 require "gd/gis"
 require "gd"
 
@@ -9,9 +13,11 @@ map = GD::GIS::Map.new(
   basemap: :esri_satellite
 )
 
-map.add_geojson("railways.geojson", color: [255, 80, 80])
-map.add_geojson("parks.geojson",    color: [120, 200, 120])
-map.add_geojson("wards.geojson",    color: [200, 200, 255])
+map.style = GD::GIS::Style.load("solarized")
+
+map.add_geojson("railways.geojson")
+map.add_geojson("parks.geojson")
+map.add_geojson("wards.geojson")
 
 map.render
 map.save("tokyo.png")

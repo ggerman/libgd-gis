@@ -1,6 +1,7 @@
 module GD
   module GIS
     class PointsLayer
+
       def initialize(data, lon:, lat:, icon:, label: nil, font: nil, size: 12, color: [0,0,0])
         @data = data
         @lon = lon
@@ -24,12 +25,8 @@ module GD
       def build_default_marker
         size = 32
         img = GD::Image.new(size, size)
-        img.alpha_blending = true
-        img.save_alpha = true
-
-        transparent = GD::Color.rgba(0,0,0,0)
-        img.filled_rectangle(0,0,size,size,transparent)
-
+        img.antialias = true
+        
         white = GD::Color.rgb(255,255,255)
         black = GD::Color.rgb(0,0,0)
 

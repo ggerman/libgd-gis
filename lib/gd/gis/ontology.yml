@@ -21,3 +21,8 @@ water:
       - lake
       - reservoir
       - riverbank
+
+track:
+  gps:
+    name:
+      - track
