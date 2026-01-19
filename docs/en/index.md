@@ -1,7 +1,7 @@
 <div class="doc-header">
 
   <div class="nav-left">
-    <img src="../images/logo-gis.png" class="nav-logo"/>
+    <img src="../images/logo-gis.png" class="nav-logo" width="250" />
     <span class="nav-title">libgd-gis</span>
   </div>
 
@@ -11,9 +11,9 @@
 
   <div class="doc-lang">
     <strong>Language:</strong>
-    <a href="en/index.md">🇬🇧 EN</a>
-    <a href="../es/index.md">🇪🇸 ES</a>
-    <a href="../jp/index.md">🇯🇵 JP</a>
+    <a href="en/index.html">🇬🇧 EN</a>
+    <a href="../es/index.html">🇪🇸 ES</a>
+    <a href="../jp/index.html">🇯🇵 JP</a>
   </div>
 
 </div>
