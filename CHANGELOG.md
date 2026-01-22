@@ -1,5 +1,37 @@
 # Changelog
 
+#### [v0.2.9] —✨ Added
+
+- Full support for **GeoJSON Point features** as overlay layers.
+- New **`points`** section in styles (`solarized.yml`) to configure:
+  - `icon`
+  - `font`
+  - `size`
+  - `color` (RGB, RGBA, or automatic).
+- **Point labels**, configurable via style.
+- Centralized color normalization via `Style#normalize_color`.
+- Automatic **random vivid color** generation when no color is specified.
+- Default point marker when no `icon` is provided.
+
+#### 🔧 Changed
+
+- GeoJSON classification now takes **geometry type** (`Point`, `LineString`, `Polygon`) into account in addition to feature properties.
+- `Point` features are rendered as **overlay layers** (`PointsLayer`) instead of legacy semantic layers.
+- Style handling is centralized in `Style`; layers now receive resolved values only (improved separation of concerns).
+
+#### 🛡️ Improved
+
+- Stricter style validation:
+  - Clear exceptions are raised when required `points` keys are missing.
+- More explicit error messages for better debugging and developer experience.
+- Cleaner architecture between `Map`, `Style`, and rendering layers with reduced coupling.
+
+#### 🐛 Fixed
+
+- GeoJSON files containing only `Point` features now render correctly.
+- Fixed silent failures caused by mismatches between style definitions and geometry types.
+- Corrected improper calls to color helpers (`ColorHelpers`).
+
 ## [v0.2.5] — CRS, Ontology & Multi-source GIS
 
 This release transforms libgd-gis from an OSM-only renderer into a

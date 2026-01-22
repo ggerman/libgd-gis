@@ -8,7 +8,7 @@ module GD
         @rules = YAML.load_file(path)
       end
 
-      def classify(properties)
+      def classify(properties, geometry_type: nil)
         @rules.each do |layer, sources|
           sources.each do |source, rules|
             rules.each do |key, values|
@@ -19,8 +19,12 @@ module GD
             end
           end
         end
+
+        return :points if geometry_type == "Point"
+
         nil
       end
+
     end
   end
 end

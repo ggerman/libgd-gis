@@ -7,10 +7,11 @@ module GD
         @lon = lon
         @lat = lat
 
-        if icon
-          @icon = GD::Image.open(icon)
+        if icon.kind_of?(Array) || icon.nil?
+          fill, stroke = icon || [GD::GIS::ColorHelpers.random_rgb, GD::GIS::ColorHelpers.random_rgb]
+          @icon = build_default_marker(fill, stroke)
         else
-          @icon = build_default_marker
+          @icon = GD::Image.open(icon)
         end
 
         @label = label
@@ -22,23 +23,21 @@ module GD
         @icon.save_alpha = true
       end
 
-      def build_default_marker
+      def build_default_marker(fill, stroke)
         size = 32
+
         img = GD::Image.new(size, size)
         img.antialias = true
-        
-        white = GD::Color.rgb(255,255,255)
-        black = GD::Color.rgb(0,0,0)
 
         cx = size / 2
         cy = size / 2
-        r  = 12
+        r  = 5
 
-        # borde blanco
-        img.arc(cx, cy, r*2+4, r*2+4, 0, 360, white)
+        # stroke
+        img.arc(cx, cy, r*2+4, r*2+4, 0, 360, stroke)
 
-        # relleno negro
-        img.filled_arc(cx, cy, r*2, r*2, 0, 360, black)
+        # fill
+        img.filled_arc(cx, cy, r*2, r*2, 0, 360, fill)
 
         img
       end

@@ -24,7 +24,7 @@ module GD
         width: nil,
         height: nil,
         crs: nil,
-	      fitted_bbox: false
+        fitted_bbox: false
       )
         # --------------------------------------------------
         # 1. Basic input validation
@@ -150,7 +150,34 @@ module GD
             # o @layers[:street] << feature
           else
             geom_type = feature.geometry["type"]
-            if geom_type == "LineString" || geom_type == "MultiLineString"
+
+            if geom_type == "Point"
+              points_style = @style.points or
+                raise ArgumentError, "Style error: missing 'points' section"
+
+              font = points_style[:font] or
+                raise ArgumentError, "Style error: points.font is required"
+
+              size = points_style[:size] or
+                raise ArgumentError, "Style error: points.size is required"
+
+              raw_color = points_style[:color]
+              color = @style.normalize_color(raw_color)
+
+              icon  = points_style.key?(:icon_fill) && points_style.key?(:icon_stroke) ? [points_style[:icon_stroke], points_style[:icon_stroke]] : nil
+              icon  = points_style.key?(:icon) ? points_style[:icon] : nil if icon.nil?
+
+              @points_layers << GD::GIS::PointsLayer.new(
+                [feature],
+                lon:   ->(f) { f.geometry["coordinates"][0] },
+                lat:   ->(f) { f.geometry["coordinates"][1] },
+                icon:  icon,
+                label: ->(f) { f.properties["name"] },  # 👈 TEXTO
+                font:  font,
+                size:  size,
+                color: color
+              )
+            elsif geom_type == "LineString" || geom_type == "MultiLineString"
               @layers[:minor] << feature
             end
           end
