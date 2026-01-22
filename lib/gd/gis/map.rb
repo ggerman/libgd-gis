@@ -203,7 +203,11 @@ module GD
       # Rendering (LEGACY, UNCHANGED)
       # -----------------------------------
       def render
-        raise "map.style must be set" unless @style
+        unless @basemap.tileable?
+          @image = GD::Image.new(@width || 1024, @height || 1024)
+          @basemap.render(self)
+          return
+        end
 
         if @width && @height
           render_viewport
