@@ -6,7 +6,6 @@ require_relative "ontology"
 module GD
   module GIS
     class LayerGeoJSON
-
       def self.load(path)
         data = JSON.parse(File.read(path))
 
@@ -20,7 +19,10 @@ module GD
         # 3) Normalize geometries + classify
         data["features"].map do |f|
           normalize_geometry!(f["geometry"], normalizer)
-          layer = ontology.classify(f["properties"] || {})
+          layer = ontology.classify(
+            f["properties"] || {},
+            geometry_type: f["geometry"]["type"]
+          )
           Feature.new(f["geometry"], f["properties"], layer)
         end
       end

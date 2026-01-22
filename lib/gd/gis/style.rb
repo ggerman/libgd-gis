@@ -3,13 +3,14 @@ require "yaml"
 module GD
   module GIS
     class Style
-      attr_reader :roads, :rails, :water, :parks, :order
+      attr_reader :roads, :rails, :water, :parks, :points, :order
 
       def initialize(definition)
         @roads = definition[:roads] || {}
         @rails = definition[:rails] || {}
         @water = definition[:water] || {}
         @parks = definition[:parks] || {}
+        @points = definition[:points] || {}
         @order = definition[:order] || []
       end
 
@@ -25,6 +26,7 @@ module GD
           rails: data[:rail] || data[:rails],
           water: data[:water],
           parks: data[:park] || data[:parks],
+          points: data[:points],
           order: (data[:order] || []).map(&:to_sym)
         )
       end
@@ -38,6 +40,31 @@ module GD
           obj.map { |v| deep_symbolize(v) }
         else
           obj
+        end
+      end
+
+      def normalize_color(color)
+        case color
+        when GD::Color
+          color
+
+        when Array
+          case color.length
+          when 3
+            GD::Color.rgb(*color)
+          when 4
+            GD::Color.rgba(*color)
+          else
+            raise ArgumentError,
+              "Style error: color array must be [r,g,b] or [r,g,b,a]"
+          end
+
+        when nil
+          GD::GIS::ColorHelpers.random_vivid
+
+        else
+          raise ArgumentError,
+            "Style error: invalid color format (#{color.inspect})"
         end
       end
     end
