@@ -1,4 +1,10 @@
 water:
+  osm:
+    waterway:
+      - river
+      - canal
+      - stream
+
   ign:
     objeto:
       - canal
@@ -26,3 +32,5 @@ track:
   gps:
     name:
       - track
+
+

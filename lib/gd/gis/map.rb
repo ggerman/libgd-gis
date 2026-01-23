@@ -131,6 +131,7 @@ module GD
         @style = nil
 
         @debug = false
+        @used_labels = {}
       end
 
       # Returns all features belonging to a given semantic layer.
@@ -153,6 +154,64 @@ module GD
           item.is_a?(Array) ? item.last : item
         end
       end
+      
+      # Creates a single text label for a named linear feature (LineString or
+      # MultiLineString), avoiding duplicate labels for the same named entity.
+      #
+      # Many datasets (especially OSM) split a single logical entity
+      # (rivers, streets, railways, etc.) into multiple line features that
+      # all share the same name. This method ensures that:
+      #
+      # - Only one label is created per unique entity name
+      # - The label is placed on a representative segment of the geometry
+      # - The logic is independent of the feature's semantic layer (water, road, rail)
+      #
+      # Labels are rendered using a PointsLayer because libgd-gis does not
+      # support text rendering directly on line geometries.
+      #
+      # The label position is chosen as the midpoint of the line coordinates.
+      # This is a simple heuristic that provides a reasonable placement without
+      # requiring geometry merging or topological analysis.
+      #
+      # @param feature [GD::GIS::Feature]
+      #   A feature with a linear geometry and a "name" property.
+      #
+      # @return [void]
+      #   Adds a PointsLayer to @points_layers if a label is created.
+      #
+      # @note
+      #   This method must be called during feature loading (add_geojson),
+      #   before rendering. It intentionally does not depend on map style
+      #   configuration, which is applied later during rendering.
+      def maybe_create_line_label(feature)
+        geom = feature.geometry
+        return unless LINE_GEOMS.include?(geom["type"])
+
+        name = feature.properties["name"]
+        return if name.nil? || name.empty?
+
+        key = feature.properties["wikidata"] || name
+        return if @used_labels[key]
+
+        coords = geom["coordinates"]
+        coords = coords.flatten(1) if geom["type"] == "MultiLineString"
+        return if coords.size < 2
+
+        lon, lat = coords[coords.size / 2]
+
+        @points_layers << GD::GIS::PointsLayer.new(
+          [feature],
+          lon:   ->(_) { lon },
+          lat:   ->(_) { lat },
+	        icon: nil,
+          label: ->(_) { name },
+      	  font:  GD::GIS::FontHelper.random,
+      	  size:  10,
+      	  color: GD::Color.rgb(0, 0, 0)
+        )
+
+        @used_labels[key] = true
+      end
 
       # Loads features from a GeoJSON file.
       #
@@ -167,12 +226,14 @@ module GD
         features = LayerGeoJSON.load(path)
 
         features.each do |feature|
+          maybe_create_line_label(feature)
+
           case feature.layer
           when :water
             kind =
               case (feature.properties["objeto"] || feature.properties["waterway"]).to_s.downcase
-              when /river|río/     then :river
-              when /stream|arroyo/ then :stream
+              when /river|río|canal/	then :river
+              when /stream|arroyo/ 	then :stream
               else :minor
               end
 
@@ -192,14 +253,19 @@ module GD
             geom_type = feature.geometry["type"]
 
             if geom_type == "Point"
-              points_style = @style.points or
-                raise ArgumentError, "Style error: missing 'points' section"
+              points_style = @style.points || begin
+                warn "Style error: missing 'points' section"
+              end
 
-              font = points_style[:font] or
-                raise ArgumentError, "Style error: points.font is required"
+              font = points_style[:font] || begin
+                warn "[libgd-gis] points.font not defined in style, using random system font"
+                GD::GIS::FontHelper.random
+              end
 
-              size = points_style[:size] or
-                raise ArgumentError, "Style error: points.size is required"
+              size = points_style[:size] || begin
+                warn "[libgd-gis] points.font size not defined in style, using random system font size"
+                (6..14).to_a.sample
+              end
 
               raw_color = points_style[:color]
               color = @style.normalize_color(raw_color)
@@ -215,7 +281,7 @@ module GD
                 lon:   ->(f) { f.geometry["coordinates"][0] },
                 lat:   ->(f) { f.geometry["coordinates"][1] },
                 icon:  icon,
-                label: ->(f) { f.properties["name"] }, # 👈 TEXTO
+                label: ->(f) { f.properties["name"] },
                 font:  font,
                 size:  size,
                 color: color
