@@ -1,18 +1,55 @@
+# frozen_string_literal: true
+
 require "net/http"
 require "fileutils"
 
 module GD
   module GIS
+    # Fetches and manages raster basemap tiles using the XYZ
+    # Web Mercator tiling scheme.
+    #
+    # A Basemap is responsible for:
+    # - Converting geographic coordinates to tile coordinates
+    # - Downloading raster tiles from public tile providers
+    # - Caching tiles on disk
+    # - Exposing pixel origins for map composition
+    #
+    # All tiles are assumed to be 256×256 pixels.
+    #
+    # @example Fetch tiles for a bounding box
+    #   bbox = [-3.8, 40.3, -3.6, 40.5] # west, south, east, north
+    #   basemap = GD::GIS::Basemap.new(12, bbox, :carto_light)
+    #   tiles, origin_x, origin_y = basemap.fetch_tiles
+    #
     class Basemap
+      # Tile size in pixels (Web Mercator standard)
       TILE_SIZE = 256
-      attr_reader :origin_x, :origin_y
 
-      def initialize(zoom, bbox, provider=:carto_light)
+      # @return [Integer] pixel X origin of the basemap
+      attr_reader :origin_x
+
+      # @return [Integer] pixel Y origin of the basemap
+      attr_reader :origin_y
+
+      # Creates a new basemap tile source.
+      #
+      # @param zoom [Integer] zoom level
+      # @param bbox [Array<Float>] bounding box [west, south, east, north]
+      # @param provider [Symbol] tile provider/style
+      def initialize(zoom, bbox, provider = :carto_light)
         @zoom = zoom
         @bbox = bbox
         @provider = provider
       end
 
+      # Builds a tile URL for a given provider and tile coordinate.
+      #
+      # @param z [Integer] zoom level
+      # @param x [Integer] tile X coordinate
+      # @param y [Integer] tile Y coordinate
+      # @param style [Symbol] tile style/provider
+      # @return [String] tile URL
+      # @raise [RuntimeError] if the provider is unknown
       def url(z, x, y, style = :osm)
         case style
 
@@ -54,9 +91,6 @@ module GD
 
         when :esri_terrain
           "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/#{z}/#{y}/#{x}"
-
-        when :esri_hybrid
-          "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/#{z}/#{y}/#{x}"
 
         # ==============================
         # STAMEN 503
@@ -102,15 +136,34 @@ module GD
         end
       end
 
+      # Converts longitude to tile X coordinate.
+      #
+      # @param lon [Float] longitude in degrees
+      # @return [Integer] tile X coordinate
       def lon2tile(lon)
-        ((lon + 180.0) / 360.0 * (2 ** @zoom)).floor
+        ((lon + 180.0) / 360.0 * (2**@zoom)).floor
       end
 
+      # Converts latitude to tile Y coordinate.
+      #
+      # @param lat [Float] latitude in degrees
+      # @return [Integer] tile Y coordinate
       def lat2tile(lat)
         rad = lat * Math::PI / 180
-        ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math::PI) / 2 * (2 ** @zoom)).floor
+        ((1 - (Math.log(Math.tan(rad) + (1 / Math.cos(rad))) / Math::PI)) / 2 * (2**@zoom)).floor
       end
 
+      # Downloads all tiles required to cover the bounding box.
+      #
+      # Tiles are cached on disk under `tmp/tiles`.
+      #
+      # @return [Array]
+      #   - tiles [Array<Array(Integer, Integer, String)>]
+      #     list of [x, y, file_path]
+      #   - origin_x [Integer] pixel X origin
+      #   - origin_y [Integer] pixel Y origin
+      #
+      # @raise [RuntimeError] if a tile cannot be fetched
       def fetch_tiles
         west, south, east, north = @bbox
 
@@ -133,8 +186,14 @@ module GD
           (y_min..y_max).each do |y|
             path = nil
 
-            unless File.exist?("tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.png") ||
-                  File.exist?("tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.jpg")
+            if File.exist?("tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.png") ||
+               File.exist?("tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.jpg")
+              path = if File.exist?("tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.png")
+                       "tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.png"
+                     else
+                       "tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.jpg"
+                     end
+            else
 
               uri = URI(url(@zoom, x, y, @provider))
 
@@ -159,15 +218,9 @@ module GD
                 path = "tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.#{ext}"
                 File.binwrite(path, res.body)
               end
-            else
-              if File.exist?("tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.png")
-                path = "tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.png"
-              else
-                path = "tmp/tiles/#{@provider}_#{@zoom}_#{x}_#{y}.jpg"
-              end
             end
 
-            tiles << [x,y,path]
+            tiles << [x, y, path]
           end
         end
 

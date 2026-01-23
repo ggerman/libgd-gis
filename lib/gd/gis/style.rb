@@ -1,10 +1,42 @@
+# frozen_string_literal: true
+
 require "yaml"
 
 module GD
   module GIS
+    # Defines visual styling rules for map rendering.
+    #
+    # A Style object encapsulates all visual configuration used
+    # during rendering, including colors, stroke widths, fonts,
+    # and layer ordering.
+    #
+    # Styles are typically loaded from YAML files and applied
+    # to a {GD::GIS::Map} instance before rendering.
+    #
     class Style
-      attr_reader :roads, :rails, :water, :parks, :points, :order
+      # @return [Hash] road styling rules
+      attr_reader :roads
 
+      # @return [Hash] rail styling rules
+      attr_reader :rails
+
+      # @return [Hash] water styling rules
+      attr_reader :water
+
+      # @return [Hash] park styling rules
+      attr_reader :parks
+
+      # @return [Hash] point styling rules
+      attr_reader :points
+
+      # @return [Array<Symbol>] drawing order of semantic layers
+      attr_reader :order
+
+      # Creates a new style from a definition hash.
+      #
+      # @param definition [Hash]
+      #   style definition with optional sections:
+      #   :roads, :rails, :water, :parks, :points, :order
       def initialize(definition)
         @roads = definition[:roads] || {}
         @rails = definition[:rails] || {}
@@ -14,6 +46,22 @@ module GD
         @order = definition[:order] || []
       end
 
+      # Loads a style definition from a YAML file.
+      #
+      # The file name is resolved as:
+      #
+      #   <from>/<name>.yml
+      #
+      # All keys are deep-symbolized on load.
+      #
+      # @param name [String, Symbol]
+      #   style name (without extension)
+      # @param from [String]
+      #   directory containing style files
+      #
+      # @return [Style]
+      # @raise [RuntimeError] if the style file does not exist
+      # @raise [Psych::SyntaxError] if the YAML is invalid
       def self.load(name, from: "styles")
         path = File.join(from, "#{name}.yml")
         raise "Style not found: #{path}" unless File.exist?(path)
@@ -31,6 +79,10 @@ module GD
         )
       end
 
+      # Recursively converts hash keys to symbols.
+      #
+      # @param obj [Object]
+      # @return [Object]
       def self.deep_symbolize(obj)
         case obj
         when Hash
@@ -43,6 +95,17 @@ module GD
         end
       end
 
+      # Normalizes a color definition into a GD::Color.
+      #
+      # Accepted formats:
+      # - GD::Color instance
+      # - [r, g, b]
+      # - [r, g, b, a]
+      # - nil (generates a random vivid color)
+      #
+      # @param color [GD::Color, Array<Integer>, nil]
+      # @return [GD::Color]
+      # @raise [ArgumentError] if the format is invalid
       def normalize_color(color)
         case color
         when GD::Color
@@ -56,7 +119,7 @@ module GD
             GD::Color.rgba(*color)
           else
             raise ArgumentError,
-              "Style error: color array must be [r,g,b] or [r,g,b,a]"
+                  "Style error: color array must be [r,g,b] or [r,g,b,a]"
           end
 
         when nil
@@ -64,7 +127,7 @@ module GD
 
         else
           raise ArgumentError,
-            "Style error: invalid color format (#{color.inspect})"
+                "Style error: invalid color format (#{color.inspect})"
         end
       end
     end

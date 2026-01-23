@@ -8,7 +8,7 @@ require "gd"
 ZOOM = 7
 TILE_SIZE = 256
 
-# Bounding box Argentina (igual que en argentina_tiles.rb)
+# Bounding box Argentina 
 WEST  = -73.6
 EAST  = -53.6
 NORTH = -21.8
