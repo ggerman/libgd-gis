@@ -28,6 +28,7 @@ require "gd"
 #   map.save("map_name.png")
 #
 require_relative "gis/color_helpers"
+require_relative "gis/font_helper"
 require_relative "gis/style"
 require_relative "gis/classifier"
 
