@@ -48,7 +48,7 @@ libgd-gis sigue un pipeline claro:
 
 | Archivo | Descripción |
 |--------|-------------|
-| [`new.md`](new.md) | Bounding box, zoom, tamaño de imagen y ajuste automático |
+| [`new.md`](map_new.md) | Bounding box, zoom, tamaño de imagen y ajuste automático |
 
 ---
 

@@ -51,7 +51,7 @@ libgd-gis follows a clear and explicit rendering pipeline:
 
 | File | Description |
 |------|-------------|
-| [`new.md`](new.md) | Define bounding boxes, zoom levels, image size, and automatic fitting |
+| [`new.md`](map_new.md) | Define bounding boxes, zoom levels, image size, and automatic fitting |
 
 This section explains how to control **what part of the world is rendered**
 and **at what resolution**.

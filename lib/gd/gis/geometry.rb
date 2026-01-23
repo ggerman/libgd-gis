@@ -1,54 +1,101 @@
+# frozen_string_literal: true
+
 module GD
   module GIS
+    # Geometry and projection helpers for Web Mercator maps.
+    #
+    # This module provides low-level utilities for:
+    # - Web Mercator (EPSG:3857) projection math
+    # - Bounding box manipulation
+    # - Viewport fitting
+    # - Simple geometric operations for visualization
+    #
+    # All longitude/latitude values are assumed to be in WGS84
+    # (EPSG:4326), unless explicitly stated otherwise.
+    #
+    # ⚠️ These helpers are intended for *rendering and visualization*,
+    # not for precise geospatial analysis.
+    #
     module Geometry
-
+      # Web Mercator tile size in pixels
       TILE_SIZE = 256.0
+
+      # Maximum latitude supported by Web Mercator
       MAX_LAT   = 85.05112878
 
-      # --------------------------------------------------
-      # Validation
-      # --------------------------------------------------
-
+      # Validates a bounding box.
+      #
+      # @param bbox [Array<Float>]
+      #   [min_lng, min_lat, max_lng, max_lat]
+      # @raise [ArgumentError] if the bbox is invalid
+      # @return [void]
       def self.validate_bbox!(bbox)
-        unless bbox.is_a?(Array) && bbox.size == 4
-          raise ArgumentError, "bbox must be [min_lng, min_lat, max_lng, max_lat]"
-        end
+        return if bbox.is_a?(Array) && bbox.size == 4
+
+        raise ArgumentError, "bbox must be [min_lng, min_lat, max_lng, max_lat]"
       end
 
+      # Validates a coordinate array.
+      #
+      # @param coords [Array<Array<Float>>]
+      # @raise [ArgumentError] if the coordinates are invalid
+      # @return [void]
       def self.validate_coords!(coords)
-        unless coords.is_a?(Array) && coords.size >= 2
-          raise ArgumentError, "coords must be an Array of at least 2 points"
-        end
+        return if coords.is_a?(Array) && coords.size >= 2
+
+        raise ArgumentError, "coords must be an Array of at least 2 points"
       end
 
-      # --------------------------------------------------
-      # Web Mercator Projection
-      # --------------------------------------------------
-
+      # Converts longitude to Web Mercator X coordinate.
+      #
+      # @param lng [Float] longitude in degrees
+      # @param zoom [Integer] zoom level
+      # @return [Float] X coordinate in pixels
       def self.lng_to_x(lng, zoom)
         ((lng + 180.0) / 360.0) * TILE_SIZE * (2**zoom)
       end
 
+      # Converts latitude to Web Mercator Y coordinate.
+      #
+      # Latitude values are clamped to the valid Web Mercator range.
+      #
+      # @param lat [Float] latitude in degrees
+      # @param zoom [Integer] zoom level
+      # @return [Float] Y coordinate in pixels
       def self.lat_to_y(lat, zoom)
-        lat = [[lat, MAX_LAT].min, -MAX_LAT].max
+        lat = lat.clamp(-MAX_LAT, MAX_LAT)
         lat_rad = lat * Math::PI / 180.0
-        n = Math.log(Math.tan(Math::PI / 4.0 + lat_rad / 2.0))
-        (1.0 - n / Math::PI) / 2.0 * TILE_SIZE * (2**zoom)
+        n = Math.log(Math.tan((Math::PI / 4.0) + (lat_rad / 2.0)))
+        (1.0 - (n / Math::PI)) / 2.0 * TILE_SIZE * (2**zoom)
       end
 
+      # Converts Web Mercator X coordinate to longitude.
+      #
+      # @param x [Float] X coordinate in pixels
+      # @param zoom [Integer] zoom level
+      # @return [Float] longitude in degrees
       def self.x_to_lng(x, zoom)
-        (x / (TILE_SIZE * (2**zoom))) * 360.0 - 180.0
+        ((x / (TILE_SIZE * (2**zoom))) * 360.0) - 180.0
       end
 
+      # Converts Web Mercator Y coordinate to latitude.
+      #
+      # @param y [Float] Y coordinate in pixels
+      # @param zoom [Integer] zoom level
+      # @return [Float] latitude in degrees
       def self.y_to_lat(y, zoom)
-        n = Math::PI - 2.0 * Math::PI * y / (TILE_SIZE * (2**zoom))
+        n = Math::PI - (2.0 * Math::PI * y / (TILE_SIZE * (2**zoom)))
         180.0 / Math::PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)))
       end
 
-      # --------------------------------------------------
-      # Viewport
-      # --------------------------------------------------
-
+      # Computes a viewport bounding box fitted to an image size.
+      #
+      # @param bbox [Array<Float>]
+      #   input bounding box [min_lng, min_lat, max_lng, max_lat]
+      # @param zoom [Integer] zoom level
+      # @param width [Integer] image width in pixels
+      # @param height [Integer] image height in pixels
+      # @return [Array<Float>] fitted bounding box
       def self.viewport_bbox(bbox:, zoom:, width:, height:)
         validate_bbox!(bbox)
 
@@ -76,19 +123,15 @@ module GD
         ]
       end
 
-      # --------------------------------------------------
-      # Geometry helpers
-      # --------------------------------------------------
-
-      # buffer_line(coords, meters)
+      # Creates a naive buffer polygon around a line.
       #
-      # coords  :: Array<[lng, lat]> in WGS84
-      # meters  :: Numeric (approximate)
+      # ⚠️ This uses an approximate meters-to-degrees conversion
+      # and is intended for visualization only.
       #
-      # NOTE:
-      # - Naive meters-to-degrees conversion
-      # - Suitable for visualization, not analysis
-      #
+      # @param coords [Array<Array<Float>>]
+      #   array of [lng, lat] points
+      # @param meters [Numeric] buffer distance (approximate)
+      # @return [Array<Array<Float>>] polygon coordinates
       def self.buffer_line(coords, meters)
         validate_coords!(coords)
 
@@ -102,7 +145,7 @@ module GD
           dx = x2 - x1
           dy = y2 - y1
 
-          len = Math.sqrt(dx * dx + dy * dy)
+          len = Math.sqrt((dx * dx) + (dy * dy))
           next if len.zero?
 
           nx = -dy / len
@@ -110,8 +153,8 @@ module GD
 
           off = meters / 111_320.0
 
-          left  << [x1 + nx * off, y1 + ny * off]
-          right << [x1 - nx * off, y1 - ny * off]
+          left  << [x1 + (nx * off), y1 + (ny * off)]
+          right << [x1 - (nx * off), y1 - (ny * off)]
         end
 
         x2, y2 = coords.last
@@ -120,7 +163,14 @@ module GD
 
         left + right.reverse
       end
-      
+
+      # Projects geographic coordinates into pixel space relative to a bbox.
+      #
+      # @param lng [Float] longitude
+      # @param lat [Float] latitude
+      # @param bbox [Array<Float>] reference bounding box
+      # @param zoom [Integer] zoom level
+      # @return [Array<Float>] [x, y] pixel coordinates
       def self.project(lng, lat, bbox, zoom)
         min_lng, _min_lat, _max_lng, max_lat = bbox
 
@@ -136,6 +186,18 @@ module GD
         ]
       end
 
+      # Computes a bounding box that fits all features in a GeoJSON file.
+      #
+      # The resulting bbox is padded and adjusted to match the
+      # requested image aspect ratio.
+      #
+      # @param path [String] path to GeoJSON file
+      # @param zoom [Integer] zoom level
+      # @param width [Integer] image width in pixels
+      # @param height [Integer] image height in pixels
+      # @param padding_px [Integer] padding in pixels
+      # @return [Array<Float>] bounding box
+      # @raise [RuntimeError] if no coordinates are found
       def self.bbox_for_image(path, zoom:, width:, height:, padding_px: 80)
         data = JSON.parse(File.read(path))
         points = []
@@ -143,6 +205,7 @@ module GD
         data["features"].each do |f|
           geom = f["geometry"]
           next unless geom
+
           collect_points(geom, points)
         end
 
@@ -167,7 +230,7 @@ module GD
         # --------------------------------------------------
         # 2. Fit bbox to image aspect ratio
         # --------------------------------------------------
-        target_ratio = width.to_f / height.to_f
+        target_ratio = width.to_f / height
         current_ratio = (max_x - min_x) / (max_y - min_y)
 
         if current_ratio > target_ratio
@@ -195,6 +258,11 @@ module GD
         ]
       end
 
+      # Collects all coordinate points from a GeoJSON geometry.
+      #
+      # @param geom [Hash] GeoJSON geometry
+      # @param points [Array] accumulator array
+      # @return [void]
       def self.collect_points(geom, points)
         case geom["type"]
         when "Point"
@@ -217,6 +285,14 @@ module GD
         end
       end
 
+      # Builds a bounding box around a point using a radius.
+      #
+      # Uses a simple spherical approximation.
+      #
+      # @param lon [Float] longitude
+      # @param lat [Float] latitude
+      # @param radius_km [Numeric] radius in kilometers
+      # @return [Array<Float>] bounding box
       def self.bbox_around_point(lon, lat, radius_km:)
         delta_lat = radius_km / 111.0
         delta_lon = radius_km / (111.0 * Math.cos(lat * Math::PI / 180.0))
@@ -228,8 +304,6 @@ module GD
           lat + delta_lat
         ]
       end
-
     end
   end
 end
-

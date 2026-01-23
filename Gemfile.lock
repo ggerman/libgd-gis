@@ -1,6 +1,13 @@
+PATH
+  remote: .
+  specs:
+    libgd-gis (0.3.0)
+      ruby-libgd (~> 0.2.3, >= 0.2.3)
+
 GEM
   remote: https://rubygems.org/
   specs:
+    ast (2.4.3)
     bigdecimal (4.0.1)
     chunky_png (1.4.0)
     date (3.5.1)
@@ -32,11 +39,22 @@ GEM
     google-protobuf (4.33.2-x86_64-linux-musl)
       bigdecimal
       rake (>= 13)
+    json (2.18.0)
+    language_server-protocol (3.17.0.5)
+    lint_roller (1.1.0)
     open-uri (0.5.0)
       stringio
       time
       uri
+    parallel (1.27.0)
+    parser (3.3.10.1)
+      ast (~> 2.4.1)
+      racc
+    prism (1.8.0)
+    racc (1.8.1)
+    rainbow (3.1.1)
     rake (13.3.1)
+    regexp_parser (2.11.3)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -50,10 +68,32 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.6)
-    ruby-libgd (0.2.1)
+    rubocop (1.82.1)
+      json (~> 2.3)
+      language_server-protocol (~> 3.17.0.2)
+      lint_roller (~> 1.1.0)
+      parallel (~> 1.10)
+      parser (>= 3.3.0.2)
+      rainbow (>= 2.2.2, < 4.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.48.0, < 2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.49.0)
+      parser (>= 3.3.7.2)
+      prism (~> 1.7)
+    rubocop-performance (1.26.1)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.75.0, < 2.0)
+      rubocop-ast (>= 1.47.1, < 2.0)
+    ruby-libgd (0.2.3)
+    ruby-progressbar (1.13.0)
     stringio (3.2.0)
     time (0.4.2)
       date
+    unicode-display_width (3.2.0)
+      unicode-emoji (~> 4.1)
+    unicode-emoji (4.2.0)
     uri (1.1.1)
 
 PLATFORMS
@@ -70,9 +110,12 @@ PLATFORMS
 DEPENDENCIES
   chunky_png
   google-protobuf (~> 4.33)
+  libgd-gis!
   open-uri
   rake
   rspec
+  rubocop (~> 1.60)
+  rubocop-performance
   ruby-libgd (~> 0.2.1)
 
 BUNDLED WITH

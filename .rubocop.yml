@@ -1,0 +1,81 @@
+# Load RuboCop plugins
+plugins:
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 3.0
+  NewCops: enable
+  Exclude:
+    - 'docs/**/*'
+    - 'examples/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+
+# --------------------------------------------------
+# Metrics
+# Disable complexity and size metrics for
+# algorithmic / GIS / rendering code
+# --------------------------------------------------
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+# --------------------------------------------------
+# Naming
+# Short names like x, y, lat, lon are standard in GIS
+# --------------------------------------------------
+Naming/MethodParameterName:
+  Enabled: false
+
+# --------------------------------------------------
+# Style
+# Avoid pedantic style rules that reduce readability
+# --------------------------------------------------
+Style/StringLiterals:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/NumericLiterals:
+  Enabled: false
+
+Style/RescueStandardError:
+  Enabled: false
+
+# --------------------------------------------------
+# Layout
+# Allow wider lines for math and rendering code
+# --------------------------------------------------
+Layout/HashAlignment:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 140
+
+# --------------------------------------------------
+# Performance
+# Avoid premature or stylistic micro-optimizations
+# --------------------------------------------------
+Performance/Casecmp:
+  Enabled: false
