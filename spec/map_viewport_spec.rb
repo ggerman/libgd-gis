@@ -60,4 +60,3 @@ RSpec.describe GD::GIS::Map do
     end
   end
 end
-
