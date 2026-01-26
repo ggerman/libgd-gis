@@ -12,7 +12,5 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 3.3"
   spec.add_dependency "ruby-libgd", "~> 0.2.3", ">= 0.2.3"
-  spec.add_development_dependency "rubocop", "~> 1.60"
-  spec.add_development_dependency "rubocop-performance", "~> 1.20"
+  spec.metadata['rubygems_mfa_required'] = 'true'
 end
-
