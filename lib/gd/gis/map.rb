@@ -154,7 +154,7 @@ module GD
           item.is_a?(Array) ? item.last : item
         end
       end
-      
+
       # Creates a single text label for a named linear feature (LineString or
       # MultiLineString), avoiding duplicate labels for the same named entity.
       #
@@ -203,11 +203,11 @@ module GD
           [feature],
           lon:   ->(_) { lon },
           lat:   ->(_) { lat },
-	        icon: nil,
+          icon: nil,
           label: ->(_) { name },
-      	  font:  GD::GIS::FontHelper.random,
-      	  size:  10,
-      	  color: GD::Color.rgb(0, 0, 0)
+          font:  GD::GIS::FontHelper.random,
+          size:  10,
+          color: GD::Color.rgb(0, 0, 0)
         )
 
         @used_labels[key] = true
@@ -233,7 +233,7 @@ module GD
             kind =
               case (feature.properties["objeto"] || feature.properties["waterway"]).to_s.downcase
               when /river|río|canal/	then :river
-              when /stream|arroyo/ 	then :stream
+              when /stream|arroyo/	then :stream
               else :minor
               end
 
@@ -298,8 +298,8 @@ module GD
       # @param data [Enumerable]
       # @param opts [Hash]
       # @return [void]
-      def add_points(data, **opts)
-        @points_layers << GD::GIS::PointsLayer.new(data, **opts)
+      def add_points(data, **)
+        @points_layers << GD::GIS::PointsLayer.new(data, **)
       end
 
       # Adds a generic lines overlay layer.
@@ -307,8 +307,8 @@ module GD
       # @param features [Array]
       # @param opts [Hash]
       # @return [void]
-      def add_lines(features, **opts)
-        @lines_layers << GD::GIS::LinesLayer.new(features, **opts)
+      def add_lines(features, **)
+        @lines_layers << GD::GIS::LinesLayer.new(features, **)
       end
 
       # Adds a generic polygons overlay layer.
@@ -316,8 +316,8 @@ module GD
       # @param polygons [Array]
       # @param opts [Hash]
       # @return [void]
-      def add_polygons(polygons, **opts)
-        @polygons_layers << GD::GIS::PolygonsLayer.new(polygons, **opts)
+      def add_polygons(polygons, **)
+        @polygons_layers << GD::GIS::PolygonsLayer.new(polygons, **)
       end
 
       # Renders the map.
