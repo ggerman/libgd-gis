@@ -42,6 +42,7 @@ GEM
     json (2.18.0)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
+    logger (1.6.0)
     open-uri (0.5.0)
       stringio
       time
@@ -54,6 +55,8 @@ GEM
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.3.1)
+    rbs (3.10.2)
+      logger
     regexp_parser (2.11.3)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
@@ -91,6 +94,9 @@ GEM
     stringio (3.2.0)
     time (0.4.2)
       date
+    typeprof (0.31.1)
+      prism (>= 1.4.0)
+      rbs (>= 3.6.0)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
@@ -117,6 +123,7 @@ DEPENDENCIES
   rubocop (~> 1.60)
   rubocop-performance (~> 1.20)
   ruby-libgd (~> 0.2.1)
+  typeprof
 
 BUNDLED WITH
    2.5.22
