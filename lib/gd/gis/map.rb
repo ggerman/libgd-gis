@@ -113,6 +113,7 @@ module GD
           primary:   [],
           secondary: [],
           street:    [],
+          track:     [],
           minor:     [],
           rail:      [],
           water:     [],
@@ -132,6 +133,7 @@ module GD
 
         @debug = false
         @used_labels = {}
+        @count = 1
       end
 
       # Returns all features belonging to a given semantic layer.
@@ -184,6 +186,8 @@ module GD
       #   before rendering. It intentionally does not depend on map style
       #   configuration, which is applied later during rendering.
       def maybe_create_line_label(feature)
+        return true if @style.global[:label] == false || @style.global[:label].nil?
+
         geom = feature.geometry
         return unless LINE_GEOMS.include?(geom["type"])
 
@@ -203,11 +207,11 @@ module GD
           [feature],
           lon:   ->(_) { lon },
           lat:   ->(_) { lat },
-          icon: nil,
+          icon: @style.global[:label][:icon],
           label: ->(_) { name },
-          font:  GD::GIS::FontHelper.random,
-          size:  10,
-          color: GD::Color.rgb(0, 0, 0)
+          font:  @style.global[:label][:font] || GD::GIS::FontHelper.random,
+          size:  @style.global[:label][:size] || (6..20).to_a.sample,
+          color: @style.global[:label][:color] || GD::GIS::ColorHelpers.random_rgba
         )
 
         @used_labels[key] = true
@@ -246,9 +250,7 @@ module GD
             @layers[:park] << feature
 
           when :track
-            # elegí una:
-            @layers[:minor] << feature
-            # o @layers[:street] << feature
+            @layers[:track] << feature
           else
             geom_type = feature.geometry["type"]
 
@@ -257,20 +259,20 @@ module GD
                 warn "Style error: missing 'points' section"
               end
 
-              font = points_style[:font] || begin
+              font = @style.points[:font] || begin
                 warn "[libgd-gis] points.font not defined in style, using random system font"
                 GD::GIS::FontHelper.random
               end
 
-              size = points_style[:size] || begin
+              size = @style.points[:size] || begin
                 warn "[libgd-gis] points.font size not defined in style, using random system font size"
                 (6..14).to_a.sample
               end
 
-              raw_color = points_style[:color]
-              color = @style.normalize_color(raw_color)
+              color = @style.points[:color] ? @style.normalize_color(@style.points[:color]) : GD::GIS::ColorHelpers.random_vivid
+              font_color = @style.points[:font_color] ? @style.normalize_color(@style.points[:font_color]) : [250, 250, 250, 0]
 
-              icon  = if points_style.key?(:icon_fill) && points_style.key?(:icon_stroke)
+              icon  = if @style.points.key?(:icon_fill) && @style.points.key?(:icon_stroke)
                         [points_style[:icon_stroke],
                          points_style[:icon_stroke]]
                       end
@@ -284,8 +286,11 @@ module GD
                 label: ->(f) { f.properties["name"] },
                 font:  font,
                 size:  size,
-                color: color
+                color: color,
+                font_color: font_color,
+                count: @count
               )
+              @count += 1
             elsif LINE_GEOMS.include?(geom_type)
               @layers[:minor] << feature
             end
@@ -464,6 +469,8 @@ module GD
           case kind
           when :street, :primary, :motorway, :secondary, :minor
             @style.roads[kind]
+          when :track
+            @style.track[kind]
           when :rail
             @style.rails
           when :water
@@ -501,7 +508,9 @@ module GD
             if POLY_GEOMS.include?(geom)
               f.draw(@image, projection, nil, nil, style)
             elsif style[:stroke]
-              color = GD::Color.rgb(*style[:stroke])
+              r, g, b, a = style[:stroke]
+              a = 0 if a.nil?
+              color = GD::Color.rgba(r, g, b, a)
 
               color = GD::GIS::ColorHelpers.random_vivid if @debug
 

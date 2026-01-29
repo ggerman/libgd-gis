@@ -38,26 +38,33 @@ module GD
         label: nil,
         font: nil,
         size: 12,
-        color: [0, 0, 0]
+        color: [0, 0, 0],
+        font_color: nil,
+        count: 0
       )
         @data = data
         @lon = lon
         @lat = lat
+        @color = color
 
         if icon.is_a?(Array) || icon.nil?
           fill, stroke = icon || [GD::GIS::ColorHelpers.random_rgb, GD::GIS::ColorHelpers.random_rgb]
           @icon = build_default_marker(fill, stroke)
+        elsif %w[numeric alphabetic].include?(icon)
+          @icon = icon
+          @font_color = font_color
         else
           @icon = GD::Image.open(icon)
+          @icon.alpha_blending = true
+          @icon.save_alpha = true
         end
 
         @label = label
         @font  = font
         @size  = size
-        @color = color
-
-        @icon.alpha_blending = true
-        @icon.save_alpha = true
+        @r, @g, @b, @a = color
+        @a = 0 if @a.nil?
+        @count = count
       end
 
       # Builds a default circular marker icon.
@@ -92,8 +99,21 @@ module GD
       #
       # @return [void]
       def render!(img, projector)
-        w = @icon.width
-        h = @icon.height
+        value = case @icon
+                when "numeric"
+                  @count
+                when "alphabetic"
+                  (@count + 96).chr
+                else
+                  "*"
+                end
+
+        if @icon.is_a?(GD::Image)
+          w = @icon.width
+          h = @icon.height
+        else
+          w = radius_from_text(img, value, font: @font, size: @size) * 2
+        end
 
         @data.each do |row|
           lon = @lon.call(row)
@@ -101,10 +121,6 @@ module GD
 
           x, y = projector.call(lon, lat)
 
-          # icono
-          img.copy(@icon, x - (w / 2), y - (h / 2), 0, 0, w, h)
-
-          # etiqueta opcional
           next unless @label && @font
 
           text = @label.call(row)
@@ -112,13 +128,80 @@ module GD
 
           font_h = @size * 1.1
 
+          if @icon == "numeric" || @icon == "alphabetic"
+
+            draw_symbol_circle!(
+              img: img,
+              x: x,
+              y: y,
+              symbol: value,
+              bg_color: @color,
+              font_color: @font_color,
+              font: @font,
+              font_size: @size
+            )
+          else
+            img.copy(@icon, x - (w / 2), y - (h / 2), 0, 0, w, h)
+          end
+
           img.text(text,
                    x: x + (w / 2) + 4,
                    y: y + (font_h / 2),
                    size: @size,
-                   color: @color,
+                   color: GD::Color.rgba(@r, @g, @b, @a),
                    font: @font)
         end
+      end
+
+      # Draws a filled circle (bullet) with a centered numeric label.
+      #
+      # - x, y: circle center in pixels
+      # - y for text() is BASELINE (not top). We compute baseline to center the text.
+      def draw_symbol_circle!(img:, x:, y:, symbol:, bg_color:, font_color:, font:, font_size:, angle: 0.0)
+        diameter = radius_from_text(img, symbol, font: font, size: font_size) * 2
+
+        # 1) Bullet background
+        img.filled_ellipse(x, y, diameter, diameter, bg_color)
+
+        # 2) Measure text in pixels (matches rendering)
+        text = symbol.to_s
+        w, h = img.text_bbox(text, font: font, size: font_size, angle: angle)
+
+        # 3) Compute centered position:
+        # text() uses baseline Y, so:
+        # top_y     = y - h/2
+        # baseline  = top_y + h = y + h/2
+        text_x = (x - (w / 2.0)).round
+        text_y = (y + (h / 2.0)).round
+
+        # 4) Draw number
+        img.text(
+          text,
+          x: text_x,
+          y: text_y,
+          font: font,
+          size: font_size,
+          color: font_color
+        )
+      end
+
+      # Calculates a circle radius that fully contains the rendered text.
+      #
+      # img      : GD::Image
+      # text     : String (number, letters, etc.)
+      # font     : path to .ttf
+      # size     : font size in points
+      # padding  : extra pixels around text (visual breathing room)
+      #
+      def radius_from_text(img, text, font:, size:, padding: 4)
+        w, h = img.text_bbox(
+          text.to_s,
+          font: font,
+          size: size
+        )
+
+        # Use the larger dimension to ensure the text fits
+        ([w, h].max / 2.0).ceil + padding
       end
     end
   end
