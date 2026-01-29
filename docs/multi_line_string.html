@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GD::GIS – MultiLineString Example (Paraná)</title>
+  <meta name="description" content="MultiLineString map rendering example using GD::GIS, YAML styling, and Carto Light basemap." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a2b;
+      --text:#e6edf7;
+      --muted:#a7b3c7;
+      --line:#22324a;
+      --link:#7cc7ff;
+      --codebg:#0a0f1a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: linear-gradient(180deg, var(--bg), #070b14);
+      color:var(--text);
+      line-height:1.55;
+    }
+    header{
+      padding:40px 16px 18px;
+      border-bottom:1px solid var(--line);
+      background: radial-gradient(1200px 500px at 20% 0%, rgba(124,199,255,.18), transparent 55%);
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:0 16px}
+    h1{margin:0 0 8px; font-size: clamp(26px, 4vw, 38px)}
+    .subtitle{margin:0; color:var(--muted)}
+    nav{
+      margin-top:14px;
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      font-size:14px;
+    }
+    nav a{color:var(--link); text-decoration:none}
+    nav a:hover{text-decoration:underline}
+    main{padding:26px 0 56px}
+    section{
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      margin:18px 0;
+    }
+    h2{margin:0 0 10px; font-size:22px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+    @media (min-width: 900px){
+      .grid{grid-template-columns: 1.1fr .9fr}
+    }
+    .note{
+      color:var(--muted);
+      font-size:14px;
+      margin:8px 0;
+    }
+    .imgcard{
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background: rgba(0,0,0,.18);
+    }
+    img{
+      width:100%;
+      height:auto;
+      border-radius:10px;
+      display:block;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    pre{
+      margin:12px 0 0;
+      border-radius:14px !important;
+      border:1px solid var(--line);
+      background: var(--codebg) !important;
+      overflow:auto;
+    }
+    code{font-size:13px}
+    footer{
+      border-top:1px solid var(--line);
+      padding:18px 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .map-wrapper {
+    position: relative;
+    }
+
+    .map-attribution {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background: rgba(0,0,0,0.55);
+    color: #e6edf7;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+    }
+
+    .map-attribution a {
+    color: #7cc7ff;
+    text-decoration: none;
+    }
+
+    .map-attribution a:hover {
+    text-decoration: underline;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <h1>MultiLineString Map Rendering</h1>
+    <p class="subtitle">
+      Static PNG map generation using <strong>GD::GIS</strong>, YAML styles, and a Carto Light basemap.
+    </p>
+    <nav>
+      <a href="./index.html">← Back to documentation</a>
+      <a href="#preview">Preview</a>
+      <a href="#style">YAML Style</a>
+      <a href="#script">Ruby Script</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="preview">
+    <h2>Render Preview</h2>
+
+    <div class="grid">
+      <div>
+        <p class="note">
+          Preview of the generated map. If the image does not appear, verify the <code>src</code> path.
+        </p>
+
+        <pre><code class="language-bash"># Create output directory
+mkdir output
+
+# Install dependency
+gem install libgd-gis
+
+# Run the script
+ruby multi_line_string.rb</code></pre>
+
+        <p class="note">Expected output:</p>
+
+        <pre><code class="language-text">✔ Generated: output/multi_line_string.png</code></pre>
+      </div>
+
+        <div class="imgcard map-wrapper">
+        <img src="examples/multi_line_string.png"
+            alt="Rendered MultiLineString map over Paraná, Argentina">
+
+        <div class="map-attribution">
+            Generated with <a href="https://github.com/ggerman/libgd-gis" target="_blank">libgd-gis</a> · Basemap © Carto
+        </div>
+        </div>
+
+    </div>
+  </section>
+
+  <section id="style">
+    <h2>Style definition (light.yml)</h2>
+<pre><code class="language-yaml">global:
+  # Set to 'false' to disable labels entirely
+  # If enabled, the following options apply
+  label:
+    color: [35, 35, 35, 20]
+    # Optional.
+    # Format: [r, g, b] or [r, g, b, a]
+    # Use nil for random color
+
+    font: /usr/share/fonts/truetype/lato/Lato-Regular.ttf
+    # Optional.
+    # Use nil for random font
+    # Use 'default' for the system default font
+
+    size: 12
+    # Optional.
+    # Use nil for a random size between 6 and 12
+    # Default size is 10
+
+    icon: icon.png
+    # Optional.
+    # Use nil to render a colored dot with a border instead of an icon
+
+track:
+  track:
+    stroke: [0, 85, 127, 250]
+    # Optional.
+    # Format: [r, g, b] or [r, g, b, a]
+    # Use nil for random color
+
+    stroke_width: 3
+    # Optional.
+    # Default value is 3
+
+order:
+  # Drawing order (layers rendered from bottom to top)
+  - track</code></pre>
+  </section>
+
+  <section id="script">
+    <h2>Ruby script (multi_line_string.rb)</h2>
+
+      <pre><code class="language-ruby">require "json"
+require "gd/gis"
+
+OUTPUT = "output/multi_line_string.png"
+
+# Bounding box that defines the visible map area.
+# Format: [min_longitude, min_latitude, max_longitude, max_latitude]
+# Covers the urban area of Paraná, Argentina.
+PARANA = [-60.58, -31.82, -60.49, -31.70]
+
+map = GD::GIS::Map.new(
+  bbox: PARANA,
+  zoom: 14,
+  basemap: :carto_light
+  # Available basemap styles:
+  # :osm
+  # :osm_hot
+  # :osm_fr
+  # :carto_light
+  # :carto_light_nolabels
+  # :carto_dark
+  # :carto_dark_nolabels
+  # :esri_satellite
+  # :esri_hybrid
+  # :esri_streets
+  # :esri_terrain
+  # :stamen_toner
+  # :stamen_toner_lite
+  # :stamen_terrain
+  # :stamen_watercolor
+  # :topo
+  # :wikimedia
+  # :railway
+  # :cyclosm
+)
+
+map.style = GD::GIS::Style.load("light")
+map.add_geojson("data/route.geojson")
+
+map.render
+map.save(OUTPUT)
+puts "✔ Generated: #{OUTPUT}"</code></pre>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Published as part of the <strong>libgd-gis</strong> documentation on GitHub Pages.
+  </div>
+</footer>
+
+<!-- Default Statcounter code for LibGD GIS
+https://ggerman.github.io/libgd-gis/ -->
+<script type="text/javascript">
+var sc_project=13201857;
+var sc_invisible=1;
+var sc_security="08afcb4b";
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics
+Made Easy - Statcounter" href="https://statcounter.com/"
+target="_blank"><img class="statcounter"
+src="https://c.statcounter.com/13201857/0/08afcb4b/1/"
+alt="Web Analytics Made Easy - Statcounter"
+referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+<!-- End of Statcounter Code -->
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

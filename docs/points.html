@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GD::GIS – Points Example</title>
+  <meta name="description" content="Points map rendering example using GD::GIS, YAML styling, and OpenStreetMap basemap." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a2b;
+      --text:#e6edf7;
+      --muted:#a7b3c7;
+      --line:#22324a;
+      --link:#7cc7ff;
+      --codebg:#0a0f1a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: linear-gradient(180deg, var(--bg), #070b14);
+      color:var(--text);
+      line-height:1.55;
+    }
+    header{
+      padding:40px 16px 18px;
+      border-bottom:1px solid var(--line);
+      background: radial-gradient(1200px 500px at 20% 0%, rgba(124,199,255,.18), transparent 55%);
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:0 16px}
+    h1{margin:0 0 8px; font-size: clamp(26px, 4vw, 38px)}
+    .subtitle{margin:0; color:var(--muted)}
+    nav{
+      margin-top:14px;
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      font-size:14px;
+    }
+    nav a{color:var(--link); text-decoration:none}
+    nav a:hover{text-decoration:underline}
+    main{padding:26px 0 56px}
+    section{
+      background:rgba(255,255,255,0.02);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      margin:18px 0;
+    }
+    h2{margin:0 0 10px; font-size:22px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+    @media (min-width: 900px){
+      .grid{grid-template-columns: 1.1fr .9fr}
+    }
+    .note{
+      color:var(--muted);
+      font-size:14px;
+      margin:8px 0;
+    }
+    .imgcard{
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background: rgba(0,0,0,.18);
+    }
+    img{
+      width:100%;
+      height:auto;
+      border-radius:10px;
+      display:block;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    pre{
+      margin:12px 0 0;
+      border-radius:14px !important;
+      border:1px solid var(--line);
+      background: var(--codebg) !important;
+      overflow:auto;
+    }
+    code{font-size:13px}
+    footer{
+      border-top:1px solid var(--line);
+      padding:18px 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .map-wrapper{position:relative}
+    .map-attribution{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      background:rgba(0,0,0,.55);
+      color:#e6edf7;
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:6px;
+      backdrop-filter: blur(4px);
+    }
+    .map-attribution a{
+      color:#7cc7ff;
+      text-decoration:none;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <h1>Points Map Rendering</h1>
+    <p class="subtitle">
+      Static PNG generation of GeoJSON points using <strong>GD::GIS</strong>, YAML styles and OpenStreetMap basemaps.
+    </p>
+    <nav>
+      <a href="./index.html">← Back to documentation</a>
+      <a href="#preview">Preview</a>
+      <a href="#style">YAML Style</a>
+      <a href="#script">Ruby Script</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="preview">
+    <h2>Render Preview</h2>
+
+    <div class="grid">
+      <div>
+        <p class="note">
+          Preview of the generated PNG map using different point rendering modes:
+          image icons, numeric markers, and alphabetic markers.
+        </p>
+
+<pre><code class="language-bash"># Create output directory
+mkdir output
+
+# Install dependency
+gem install libgd-gis
+
+# Run the script
+ruby points.rb</code></pre>
+
+        <p class="note">Expected output:</p>
+
+<pre><code class="language-text">✔ Generated: output/aerial.png</code></pre>
+      </div>
+
+      <div class="imgcard map-wrapper">
+        <img src="examples/icon.png" alt="Rendered Points map">
+        <div class="map-attribution">
+          Generated with <a href="https://github.com/ggerman/libgd-gis" target="_blank">libgd-gis</a> · Basemap © OpenStreetMap
+        </div>
+      </div>
+
+      <div class="imgcard map-wrapper">
+        <img src="examples/numeric.png" alt="Rendered Points map">
+        <div class="map-attribution">
+          Generated with <a href="https://github.com/ggerman/libgd-gis" target="_blank">libgd-gis</a> · Basemap © OpenStreetMap
+        </div>
+      </div>
+
+      <div class="imgcard map-wrapper">
+        <img src="examples/alphabetic.png" alt="Rendered Points map">
+        <div class="map-attribution">
+          Generated with <a href="https://github.com/ggerman/libgd-gis" target="_blank">libgd-gis</a> · Basemap © OpenStreetMap
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="style">
+    <h2>Style definition (solarized.yml)</h2>
+
+<pre><code class="language-yaml">global:
+  label:
+    color: [35, 35, 35, 20]
+
+points:
+  color: [0, 0, 127, 0]
+  font_color: [250, 250, 250]
+  font: /usr/share/fonts/truetype/lato/Lato-Regular.ttf
+  size: 10
+  icon: icon.png
+  # icon can also be: numeric | alphabetic</code></pre>
+  </section>
+
+  <section id="script">
+    <h2>Ruby script (points.rb)</h2>
+
+<pre><code class="language-ruby">require "gd/gis"
+require_relative "fonts"
+
+OUTPUT = "output/aerial.png"
+GEOJSON = "data/aerial.geojson"
+
+bbox = GD::GIS::Geometry.bbox_for_image(
+  GEOJSON,
+  zoom: 13,
+  width: 800,
+  height: 600,
+  padding_px: 100
+)
+
+map = GD::GIS::Map.new(
+  bbox: bbox,
+  zoom: 15,
+  width: 800,
+  height: 600,
+  basemap: :osm
+)
+
+map.style = GD::GIS::Style.load("solarized")
+map.add_geojson(GEOJSON)
+
+map.render
+map.save(OUTPUT)
+
+puts "✔ Generated: #{OUTPUT}"</code></pre>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Published as part of the <strong>libgd-gis</strong> documentation on GitHub Pages.
+  </div>
+</footer>
+
+<!-- Default Statcounter code for LibGD GIS
+https://ggerman.github.io/libgd-gis/ -->
+<script type="text/javascript">
+var sc_project=13201857;
+var sc_invisible=1;
+var sc_security="08afcb4b";
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics
+Made Easy - Statcounter" href="https://statcounter.com/"
+target="_blank"><img class="statcounter"
+src="https://c.statcounter.com/13201857/0/08afcb4b/1/"
+alt="Web Analytics Made Easy - Statcounter"
+referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+<!-- End of Statcounter Code -->
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>
