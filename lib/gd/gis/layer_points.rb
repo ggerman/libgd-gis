@@ -50,7 +50,7 @@ module GD
         if icon.is_a?(Array) || icon.nil?
           fill, stroke = icon || [GD::GIS::ColorHelpers.random_rgb, GD::GIS::ColorHelpers.random_rgb]
           @icon = build_default_marker(fill, stroke)
-        elsif icon == "numeric" || icon == "alphabetic"
+        elsif %w[numeric alphabetic].include?(icon)
           @icon = icon
           @font_color = font_color
         else
@@ -65,7 +65,6 @@ module GD
         @r, @g, @b, @a = color
         @a = 0 if @a.nil?
         @count = count
-
       end
 
       # Builds a default circular marker icon.
@@ -100,18 +99,17 @@ module GD
       #
       # @return [void]
       def render!(img, projector)
-
-        case @icon
-          when "numeric"
-              value = @count
-          when "alphabetic"
-              value = (@count + 96).chr
-          else
-            value = "*"
-        end
+        value = case @icon
+                when "numeric"
+                  @count
+                when "alphabetic"
+                  (@count + 96).chr
+                else
+                  "*"
+                end
 
         if @icon.is_a?(GD::Image)
-          w = @icon.width 
+          w = @icon.width
           h = @icon.height
         else
           w = radius_from_text(img, value, font: @font, size: @size) * 2
@@ -127,31 +125,31 @@ module GD
 
           text = @label.call(row)
           next if text.nil? || text.strip.empty?
+
           font_h = @size * 1.1
 
           if @icon == "numeric" || @icon == "alphabetic"
 
             draw_symbol_circle!(
-                    img: img,
-                    x: x,
-                    y: y,
-                    symbol: value,
-                    radius: 12,
-                    bg_color: @color,
-                    font_color: @font_color,
-                    font: @font,
-                    font_size: @size
-                  )
+              img: img,
+              x: x,
+              y: y,
+              symbol: value,
+              bg_color: @color,
+              font_color: @font_color,
+              font: @font,
+              font_size: @size
+            )
           else
             img.copy(@icon, x - (w / 2), y - (h / 2), 0, 0, w, h)
           end
 
           img.text(text,
-                  x: x + (w / 2) + 4,
-                  y: y + (font_h / 2),
-                  size: @size,
-                  color: GD::Color.rgba(@r, @g, @b, @a),
-                  font: @font)
+                   x: x + (w / 2) + 4,
+                   y: y + (font_h / 2),
+                   size: @size,
+                   color: GD::Color.rgba(@r, @g, @b, @a),
+                   font: @font)
         end
       end
 
@@ -159,7 +157,7 @@ module GD
       #
       # - x, y: circle center in pixels
       # - y for text() is BASELINE (not top). We compute baseline to center the text.
-      def draw_symbol_circle!(img:, x:, y:, symbol:, radius:, bg_color:, font_color:, font:, font_size:, angle: 0.0)
+      def draw_symbol_circle!(img:, x:, y:, symbol:, bg_color:, font_color:, font:, font_size:, angle: 0.0)
         diameter = radius_from_text(img, symbol, font: font, size: font_size) * 2
 
         # 1) Bullet background
@@ -203,9 +201,8 @@ module GD
         )
 
         # Use the larger dimension to ensure the text fits
-        (([w, h].max / 2.0).ceil) + padding
+        ([w, h].max / 2.0).ceil + padding
       end
-
     end
   end
 end
