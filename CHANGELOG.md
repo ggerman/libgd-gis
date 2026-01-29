@@ -1,4 +1,48 @@
-# Changelog
+# CHANGELOG
+
+## MultiLineString Example
+
+### v0.3.2
+- Updated example to align with core stylesheet changes.
+- Improved YAML style structure consistency with other geometry types.
+- Better defaults inherited from core styles (label handling and opacity).
+- Minor cleanup in stylesheet naming and comments.
+- No changes to geometry rendering logic.
+
+### v0.3.1
+- Initial complete MultiLineString example.
+- Demonstrates rendering of `MultiLineString` geometries from GeoJSON.
+- Basic YAML stylesheet support for:
+  - stroke color
+  - stroke width
+  - layer drawing order
+- Static bounding box definition.
+- PNG output suitable for documentation and testing.
+
+---
+
+## Points Example
+
+### v0.3.2
+- Expanded point rendering modes:
+  - image icons
+  - numeric markers
+  - alphabetic markers
+- Updated stylesheet structure to match core `points` style definition.
+- Added support for `font_color` in numeric and alphabetic modes.
+- Improved label defaults inherited from global core styles.
+- Switched to automatic bounding box calculation from GeoJSON.
+- Minor stylesheet cleanup and alignment with core style conventions.
+
+### v0.3.1
+- Initial Points example using basic icon rendering.
+- YAML stylesheet support for:
+  - point color
+  - icon image
+  - label color
+- Static font configuration.
+- Manual bounding box definition.
+
 
 #### [v0.2.9] —✨ Added
 
