@@ -101,16 +101,15 @@ module GD
       #
       # @return [void]
       def render!(img, projector)
-        value = case @icon
-                when "numeric"
-                  @symbol
-                when "alphabetic"
-                  (@symbol + 96).chr
-                when "symbol"
-                  @symbol
-                else
-                  @icon
-                end
+        value =
+          case @icon
+          when "numeric", "symbol"
+            @symbol
+          when "alphabetic"
+            (@symbol + 96).chr
+          else
+            @icon
+          end
 
         if @icon.is_a?(GD::Image)
           w = @icon.width
@@ -176,7 +175,7 @@ module GD
         # baseline  = top_y + h = y + h/2
         text_x = (x - (w / 2.0)).round
         text_y = (y + (h / 2.0)).round
-        
+
         # 4) Draw number
         img.text(
           text,

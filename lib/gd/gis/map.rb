@@ -43,8 +43,6 @@ module GD
       # @return [Boolean] enables debug rendering
       attr_reader :debug
 
-      attr_reader :legend
-
       # Creates a new map.
       #
       # @param bbox [Array<Float>]
@@ -230,6 +228,7 @@ module GD
 
         layers.each do |layer|
           next unless layer.respond_to?(:color)
+
           @legend.add(layer.color, layer.name)
         end
       end
@@ -272,8 +271,8 @@ module GD
           w
         end
 
-        width  = (text_widths.max || 0) + box_size + padding * 3
-        height = @legend.items.size * line_height + padding * 2
+        width  = (text_widths.max || 0) + box_size + (padding * 3)
+        height = (@legend.items.size * line_height) + (padding * 2)
 
         # --- position --------------------------------------------
 
@@ -285,8 +284,6 @@ module GD
             [margin, @image.height - height - margin]
           when :top_right
             [@image.width - width - margin, margin]
-          when :top_left
-            [margin, margin]
           else
             [margin, margin]
           end
@@ -302,7 +299,7 @@ module GD
         # --- items -----------------------------------------------
 
         @legend.items.each_with_index do |item, idx|
-          iy = y + padding + idx * line_height
+          iy = y + padding + (idx * line_height)
 
           # color box
           @image.filled_rectangle(
@@ -484,10 +481,10 @@ module GD
 
         @points_layers << GD::GIS::PointsLayer.new(
           [row],
-          lon: -> r { r[:lon] },
-          lat: -> r { r[:lat] },
+          lon: ->(r) { r[:lon] },
+          lat: ->(r) { r[:lat] },
           icon: icon || @style.point[:icon],
-          label: label ? -> r { r[:label] } : nil,
+          label: label ? ->(r) { r[:label] } : nil,
           font: font || @style.point[:font],
           size: size || @style.point[:size],
           color: color || @style.point[:color],
@@ -585,7 +582,7 @@ module GD
         @polygons_layers.each { |l| l.render!(@image, projection) }
         @lines_layers.each    { |l| l.render!(@image, projection) }
         @points_layers.each   { |l| l.render!(@image, projection) }
-        
+
         draw_legend
       end
 
@@ -646,7 +643,7 @@ module GD
         @polygons_layers.each { |l| l.render!(@image, projection) }
         @lines_layers.each    { |l| l.render!(@image, projection) }
         @points_layers.each   { |l| l.render!(@image, projection) }
-        
+
         draw_legend
       end
 
