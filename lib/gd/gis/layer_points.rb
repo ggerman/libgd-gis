@@ -40,19 +40,19 @@ module GD
         size: 12,
         color: [0, 0, 0],
         font_color: nil,
-        count: 0
+        symbol: 0
       )
         @data = data
         @lon = lon
         @lat = lat
         @color = color
+        @font_color = font_color
 
         if icon.is_a?(Array) || icon.nil?
           fill, stroke = icon || [GD::GIS::ColorHelpers.random_rgb, GD::GIS::ColorHelpers.random_rgb]
           @icon = build_default_marker(fill, stroke)
-        elsif %w[numeric alphabetic].include?(icon)
+        elsif %w[numeric alphabetic symbol].include?(icon)
           @icon = icon
-          @font_color = font_color
         else
           @icon = GD::Image.open(icon)
           @icon.alpha_blending = true
@@ -62,9 +62,11 @@ module GD
         @label = label
         @font  = font
         @size  = size
+
         @r, @g, @b, @a = color
         @a = 0 if @a.nil?
-        @count = count
+
+        @symbol = symbol
       end
 
       # Builds a default circular marker icon.
@@ -101,11 +103,13 @@ module GD
       def render!(img, projector)
         value = case @icon
                 when "numeric"
-                  @count
+                  @symbol
                 when "alphabetic"
-                  (@count + 96).chr
+                  (@symbol + 96).chr
+                when "symbol"
+                  @symbol
                 else
-                  "*"
+                  @icon
                 end
 
         if @icon.is_a?(GD::Image)
@@ -128,8 +132,7 @@ module GD
 
           font_h = @size * 1.1
 
-          if @icon == "numeric" || @icon == "alphabetic"
-
+          if @icon == "numeric" || @icon == "alphabetic" || @icon == "symbol"
             draw_symbol_circle!(
               img: img,
               x: x,
@@ -148,7 +151,7 @@ module GD
                    x: x + (w / 2) + 4,
                    y: y + (font_h / 2),
                    size: @size,
-                   color: GD::Color.rgba(@r, @g, @b, @a),
+                   color: @font_color,
                    font: @font)
         end
       end
@@ -173,7 +176,7 @@ module GD
         # baseline  = top_y + h = y + h/2
         text_x = (x - (w / 2.0)).round
         text_y = (y + (h / 2.0)).round
-
+        
         # 4) Draw number
         img.text(
           text,

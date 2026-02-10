@@ -7,6 +7,7 @@ require_relative "layer_geojson"
 require_relative "layer_points"
 require_relative "layer_lines"
 require_relative "layer_polygons"
+require_relative "legend"
 
 LINE_GEOMS = %w[LineString MultiLineString].freeze
 POLY_GEOMS = %w[Polygon MultiPolygon].freeze
@@ -41,6 +42,8 @@ module GD
 
       # @return [Boolean] enables debug rendering
       attr_reader :debug
+
+      attr_reader :legend
 
       # Creates a new map.
       #
@@ -217,6 +220,111 @@ module GD
         @used_labels[key] = true
       end
 
+      def legend(position: :bottom_right)
+        @legend = Legend.new(position: position)
+        yield @legend
+      end
+
+      def legend_from_layers(position: :bottom_right)
+        @legend = Legend.new(position: position)
+
+        layers.each do |layer|
+          next unless layer.respond_to?(:color)
+          @legend.add(layer.color, layer.name)
+        end
+      end
+
+      def draw_legend
+        return unless @legend
+        return unless @image
+        return unless @style
+        return unless @style.global
+        return if @style.global[:label] == false
+
+        label_style = @style.global[:label] || {}
+
+        padding     = 10
+        box_size    = 12
+        line_height = 18
+        margin      = 15
+
+        # --- font (from style) -----------------------------------
+
+        font_path =
+          case label_style[:font]
+          when nil, "default"
+            GD::GIS::FontHelper.random
+          else
+            label_style[:font]
+          end
+
+        font_size  = label_style[:size] || 10
+        font_color = GD::Color.rgba(*(label_style[:color] || [0, 0, 0, 0]))
+
+        # --- measure text (CORRECT API) ---------------------------
+
+        text_widths = @legend.items.map do |i|
+          w, = @image.text_bbox(
+            i.label,
+            font: font_path,
+            size: font_size
+          )
+          w
+        end
+
+        width  = (text_widths.max || 0) + box_size + padding * 3
+        height = @legend.items.size * line_height + padding * 2
+
+        # --- position --------------------------------------------
+
+        x, y =
+          case @legend.position
+          when :bottom_right
+            [@image.width - width - margin, @image.height - height - margin]
+          when :bottom_left
+            [margin, @image.height - height - margin]
+          when :top_right
+            [@image.width - width - margin, margin]
+          when :top_left
+            [margin, margin]
+          else
+            [margin, margin]
+          end
+
+        # --- background ------------------------------------------
+
+        bg     = GD::Color.rgba(255, 255, 255, 80)
+        border = GD::Color.rgb(200, 200, 200)
+
+        @image.filled_rectangle(x, y, x + width, y + height, bg)
+        @image.rectangle(x, y, x + width, y + height, border)
+
+        # --- items -----------------------------------------------
+
+        @legend.items.each_with_index do |item, idx|
+          iy = y + padding + idx * line_height
+
+          # color box
+          @image.filled_rectangle(
+            x + padding,
+            iy,
+            x + padding + box_size,
+            iy + box_size,
+            GD::Color.rgba(*item.color)
+          )
+
+          # label text
+          @image.text_ft(
+            item.label,
+            x: x + padding + box_size + 8,
+            y: iy + box_size,
+            font: font_path,
+            size: font_size,
+            color: font_color
+          )
+        end
+      end
+
       # Loads features from a GeoJSON file.
       #
       # This method:
@@ -288,7 +396,7 @@ module GD
                 size:  size,
                 color: color,
                 font_color: font_color,
-                count: @count
+                symbol: @count
               )
               @count += 1
             elsif LINE_GEOMS.include?(geom_type)
@@ -296,6 +404,96 @@ module GD
             end
           end
         end
+      end
+
+      # Adds a single point (marker) to the map.
+      #
+      # This is a convenience helper for the most common use case: rendering
+      # one point with an optional label and icon, without having to build
+      # a full collection or manually configure a PointsLayer.
+      #
+      # Internally, this method wraps the given coordinates into a one-element
+      # data collection and delegates rendering to {GD::GIS::PointsLayer},
+      # preserving the same rendering behavior and options.
+      #
+      # This method is intended for annotations, markers, alerts, cities,
+      # or any scenario where only one point needs to be rendered.
+      #
+      # @param lon [Numeric]
+      #   Longitude of the point.
+      # @param lat [Numeric]
+      #   Latitude of the point.
+      # @param label [String, nil]
+      #   Optional text label rendered next to the point.
+      # @param icon [String, Array<GD::Color>, nil]
+      #   Marker representation. Can be:
+      #   - a path to an image file
+      #   - :numeric or :alphabetic symbol styles
+      #   - an array of [fill, stroke] colors
+      #   - nil to generate a default marker
+      # @param font [String, nil]
+      #   Font path used to render the label or symbol.
+      # @param size [Integer]
+      #   Font size in pixels (default: 12).
+      # @param color [Array<Integer>]
+      #   Label or symbol background color as an RGB(A) array.
+      # @param font_color [GD::Color, nil]
+      #   Text color for numeric or alphabetic symbols.
+      #
+      # @return [void]
+      #
+      # @example Render a simple point
+      #   map.add_point(
+      #     lon: -58.3816,
+      #     lat: -34.6037
+      #   )
+      #
+      # @example Point with label
+      #   map.add_point(
+      #     lon: -58.3816,
+      #     lat: -34.6037,
+      #     label: "Buenos Aires"
+      #   )
+      #
+      # @example Point with numeric marker
+      #   map.add_point(
+      #     lon: -58.3816,
+      #     lat: -34.6037,
+      #     icon: "numeric",
+      #     label: "1",
+      #     font: "/usr/share/fonts/DejaVuSans.ttf"
+      #   )
+      #
+
+      def add_point(
+        lon:,
+        lat:,
+        label: nil,
+        icon: nil,
+        font: nil,
+        size: nil,
+        color: nil,
+        font_color: nil,
+        symbol: nil
+      )
+        row = {
+          lon: lon,
+          lat: lat,
+          label: label
+        }
+
+        @points_layers << GD::GIS::PointsLayer.new(
+          [row],
+          lon: -> r { r[:lon] },
+          lat: -> r { r[:lat] },
+          icon: icon || @style.point[:icon],
+          label: label ? -> r { r[:label] } : nil,
+          font: font || @style.point[:font],
+          size: size || @style.point[:size],
+          color: color || @style.point[:color],
+          font_color: font_color || @style.point[:font_color],
+          symbol: symbol
+        )
       end
 
       # Adds a generic points overlay layer.
@@ -387,6 +585,8 @@ module GD
         @polygons_layers.each { |l| l.render!(@image, projection) }
         @lines_layers.each    { |l| l.render!(@image, projection) }
         @points_layers.each   { |l| l.render!(@image, projection) }
+        
+        draw_legend
       end
 
       def render_viewport
@@ -446,6 +646,8 @@ module GD
         @polygons_layers.each { |l| l.render!(@image, projection) }
         @lines_layers.each    { |l| l.render!(@image, projection) }
         @points_layers.each   { |l| l.render!(@image, projection) }
+        
+        draw_legend
       end
 
       # Saves the rendered image to disk.
