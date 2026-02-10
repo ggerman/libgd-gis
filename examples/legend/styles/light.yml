@@ -1,0 +1,27 @@
+# examples/legend/style.yml
+
+global:
+  label:
+    color: [35, 35, 35, 20]
+    font: /usr/share/fonts/truetype/lato/Lato-Regular.ttf
+    size: 12
+    icon: null
+
+point:
+  size: 12
+  font: /usr/share/fonts/truetype/lato/Lato-Regular.ttf
+  color: [76, 175, 80, 0]
+  font_color: [85, 0, 127, 0]
+  icon: numeric
+
+legend:
+  enabled: true
+  position: bottom_right
+
+track:
+  track:
+    stroke: [0, 85, 127, 250]
+    stroke_width: 3
+
+order:
+  - track

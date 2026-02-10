@@ -17,6 +17,9 @@ module GD
       # @return [Hash] global styling rules
       attr_reader :global
 
+      # @return [Hash] point styling rules
+      attr_reader :point
+
       # @return [Hash] road styling rules
       attr_reader :roads
 
@@ -45,6 +48,7 @@ module GD
       #   :global, :roads, :rails, :water, :parks, :points, :order, :track
       def initialize(definition)
         @global = definition[:global] || {}
+        @point = definition[:point] || {}
         @roads = definition[:roads] || {}
         @rails = definition[:rails] || {}
         @water = definition[:water] || {}
@@ -79,6 +83,7 @@ module GD
 
         new(
           global: data[:global],
+          point: data[:point],
           roads: data[:roads],
           rails: data[:rail] || data[:rails],
           track: data[:track],
