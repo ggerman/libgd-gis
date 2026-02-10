@@ -8,6 +8,7 @@ gem "ruby-libgd", "~> 0.2.1"
 group :development, :test do
   gem "chunky_png"
   gem "rake"
+  gem "pry"
   gem "rspec"
   gem "rubocop", "~> 1.60", require: false
   gem "rubocop-performance", "~> 1.20", require: false
