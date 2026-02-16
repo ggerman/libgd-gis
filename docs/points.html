@@ -226,6 +226,77 @@ map.save(OUTPUT)
 puts "✔ Generated: #{OUTPUT}"</code></pre>
   </section>
 
+<section id="macos">
+  <h2>macOS Font Support</h2>
+
+  <p class="note">
+    On macOS, system fonts are stored in different directories than Linux.
+    Some examples may fail to render labels or symbols unless font paths
+    are explicitly provided.
+  </p>
+
+  <p class="note">
+    To ensure portability, the examples include a small helper file
+    (<code>fonts.rb</code>) that discovers available TrueType/OpenType fonts
+    across common system locations.
+  </p>
+
+<pre><code class="language-ruby"># fonts.rb
+module GD
+  module Fonts
+    PATHS = [
+      # Linux system fonts
+      "/usr/share/fonts",
+      "/usr/local/share/fonts",
+
+      # macOS system fonts
+      "/System/Library/Fonts",
+      "/Library/Fonts",
+
+      # User fonts
+      File.expand_path("~/Library/Fonts"), # macOS user fonts
+      File.expand_path("~/.fonts")         # Linux user fonts
+    ].freeze
+
+    EXT = "{ttf,otf,ttc}".freeze
+
+    def self.all
+      @all ||= PATHS.flat_map do |p|
+        next [] unless Dir.exist?(p)
+        Dir.glob("#{p}/**/*.#{EXT}")
+      end.uniq
+    end
+
+    def self.random
+      all.sample or raise "GD::Fonts: no fonts found on system"
+    end
+
+    def self.find(name)
+      n = name.downcase
+      all.find { |f| File.basename(f).downcase.include?(n) }
+    end
+  end
+end</code></pre>
+
+  <p class="note">
+    Include this helper in your script when running on macOS:
+  </p>
+
+<pre><code class="language-ruby">require_relative "fonts"</code></pre>
+
+  <p class="note">
+    Then reference a font path in your YAML style or dynamically select one:
+  </p>
+
+<pre><code class="language-ruby">font_path = GD::Fonts.find("Lato") || GD::Fonts.random</code></pre>
+
+  <p class="note">
+    This ensures text rendering works reliably across Linux, macOS,
+    Docker environments, and CI pipelines.
+  </p>
+</section>
+
+
 </main>
 
 <footer>
