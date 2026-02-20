@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## [0.4.2] - 2026-02-20
+
+### Added
+
+- Global geographic extents dataset (`extents_global.json`) including continents and countries (WGS84 bounding boxes)
+- Support for using named regions as `bbox` values (e.g. `:world`, `:europe`, `:argentina`)
+- Lazy-loaded `GD::GIS::Extents` module for resolving symbolic bounding boxes
+- Ability to access extents via `GD::GIS::Extents.fetch` and `GD::GIS::Extents[]`
+- New JSON-backed data storage for geographic extents
+
+### Improved
+
+- Developer experience for quick map rendering without manually specifying coordinates
+- Simplified API for demos, tests, and rapid prototyping
+
+### Notes
+
+- Bounding boxes are approximate and intended for visualization purposes
+- Coordinates use WGS84 (EPSG:4326) longitude/latitude order
+
 ## MultiLineString Example
 
 ### v0.3.2
