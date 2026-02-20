@@ -204,6 +204,35 @@ and reproducible.
 
 ---
 
+
+## Named geographic extents
+
+LibGD-GIS includes a global dataset of predefined geographic areas.
+You can use them directly as the `bbox` parameter.
+
+### Example
+
+```ruby
+map = GD::GIS::Map.new(
+  bbox: :argentina,
+  zoom: 5,
+  width: 800,
+  height: 600,
+  basemap: :osm
+)
+```
+You can also use continents or regions:
+
+```
+bbox: :world
+bbox: :europe
+bbox: :south_america
+bbox: :north_america
+bbox: :asia
+```
+
+---
+
 ## CRS Support
 
 Supported input CRS:
