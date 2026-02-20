@@ -70,6 +70,9 @@ module GD
         crs: nil,
         fitted_bbox: false
       )
+        # resolve symbolic bbox
+        bbox = GD::GIS::BBoxResolver.resolve(bbox)
+
         # 1. Basic input validation
         raise ArgumentError, "bbox must be [min_lng, min_lat, max_lng, max_lat]" unless
           bbox.is_a?(Array) && bbox.size == 4
