@@ -32,6 +32,9 @@ require_relative "gis/font_helper"
 require_relative "gis/style"
 require_relative "gis/classifier"
 
+require_relative "gis/extents"
+require_relative "gis/bbox_resolver"
+
 require_relative "gis/feature"
 require_relative "gis/map"
 require_relative "gis/basemap"
