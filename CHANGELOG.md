@@ -1,4 +1,48 @@
 # CHANGELOG
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+---
+
+## [0.4.3] - 2026-02-27
+
+### Added
+
+- Built-in default style via `GD::GIS::Style.default`
+- Maps can now be rendered without explicitly assigning a style
+- Default visual configuration for semantic layers:
+  - global settings (background, fonts, labels)
+  - roads
+  - rails
+  - water
+  - parks
+  - points
+  - track
+- Default font and text color for point labels
+- Default drawing order when no external style is provided
+
+### Changed
+
+- `GD::GIS::Map` now automatically assigns a default style during initialization
+- Style configuration is now optional when creating a map
+- Rendering pipeline updated to operate safely with default style values
+- Track layer styling structure aligned with renderer expectations
+
+### Fixed
+
+- Prevented crashes when a map instance had no style assigned
+- Fixed `NoMethodError` caused by `@style` being `nil`
+- Corrected handling of track layer style definitions
+- Ensured label rendering works with the default style
+- Fixed font and color handling for point labels
+
+### Backward Compatibility
+
+- Existing custom styles remain fully supported
+- External YAML styles continue to work unchanged
+- Explicit style assignment (`map.style = ...`) still overrides defaults
 
 ## [0.4.2] - 2026-02-20
 
