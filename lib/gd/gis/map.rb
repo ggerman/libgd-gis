@@ -132,9 +132,6 @@ module GD
         @lines_layers    = []
         @polygons_layers = []
 
-        # 7. Style
-        @style = nil
-
         @debug = false
         @used_labels = {}
         @count = 1
@@ -190,6 +187,7 @@ module GD
       #   before rendering. It intentionally does not depend on map style
       #   configuration, which is applied later during rendering.
       def maybe_create_line_label(feature)
+        @style ||= GD::GIS::Style.default
         return true if @style.global[:label] == false || @style.global[:label].nil?
 
         geom = feature.geometry
@@ -215,7 +213,8 @@ module GD
           label: ->(_) { name },
           font:  @style.global[:label][:font] || GD::GIS::FontHelper.random,
           size:  @style.global[:label][:size] || (6..20).to_a.sample,
-          color: @style.global[:label][:color] || GD::GIS::ColorHelpers.random_rgba
+          color: @style.global[:label][:color] || GD::GIS::ColorHelpers.random_rgba,
+          font_color: @style.global[:label][:color] || GD::GIS::ColorHelpers.random_rgba
         )
 
         @used_labels[key] = true
@@ -237,6 +236,7 @@ module GD
       end
 
       def draw_legend
+        @style ||= GD::GIS::Style.default
         return unless @legend
         return unless @image
         return unless @style
@@ -335,6 +335,7 @@ module GD
       # @param path [String] path to GeoJSON file
       # @return [void]
       def add_geojson(path)
+        @style ||= GD::GIS::Style.default
         features = LayerGeoJSON.load(path)
 
         features.each do |feature|
@@ -482,6 +483,8 @@ module GD
           label: label
         }
 
+        @style ||= GD::GIS::Style.default
+
         @points_layers << GD::GIS::PointsLayer.new(
           [row],
           lon: ->(r) { r[:lon] },
@@ -502,6 +505,7 @@ module GD
       # @param opts [Hash]
       # @return [void]
       def add_points(data, **)
+        @style ||= GD::GIS::Style.default
         @points_layers << GD::GIS::PointsLayer.new(data, **)
       end
 
@@ -511,6 +515,7 @@ module GD
       # @param opts [Hash]
       # @return [void]
       def add_lines(features, **)
+        @style ||= GD::GIS::Style.default
         @lines_layers << GD::GIS::LinesLayer.new(features, **)
       end
 
@@ -520,6 +525,7 @@ module GD
       # @param opts [Hash]
       # @return [void]
       def add_polygons(polygons, **)
+        @style ||= GD::GIS::Style.default
         @polygons_layers << GD::GIS::PolygonsLayer.new(polygons, **)
       end
 
@@ -531,6 +537,7 @@ module GD
       # @return [void]
       # @raise [RuntimeError] if style is not set
       def render
+        # Style assign DEFAULT Styles
         raise "map.style must be set" unless @style
 
         if @width && @height

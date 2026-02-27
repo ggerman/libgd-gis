@@ -42,6 +42,9 @@ This library is designed for **map visualization**, not for spatial analysis.
 
 ---
 
+> 🆕 **Update:** Style is no longer mandatory. Maps now render out-of-the-box using a built-in default style.
+
+---
 ## Features
 
 - Web Mercator tile rendering (OSM, CARTO, ESRI, Stamen, etc.)

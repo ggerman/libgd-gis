@@ -110,6 +110,80 @@ module GD
         end
       end
 
+      # Returns a built-in default style so Map can render even if no external style is set.
+      #
+      # @return [Style]
+      def self.default
+        new({
+              global: {
+                background: [15, 23, 42],
+                font: GD::GIS::FontHelper.find("DejaVuSans"),
+                font_color: [243, 244, 246],
+                label: {
+                  color: [229, 231, 235],
+                  font: GD::GIS::FontHelper.find("DejaVuSans"),
+                  size: 12
+                }
+              },
+
+          label: {
+            label: {
+              color: [229, 231, 235],
+              font: GD::GIS::FontHelper.find("DejaVuSans"),
+              size: 12
+            }
+          },
+
+          roads: {
+            roads: {
+              color: [229, 231, 235],
+              font: GD::GIS::FontHelper.find("DejaVuSans"),
+              width: 6
+            }
+          },
+
+          rails: {
+            rails: {
+              color: [156, 163, 175],
+              font: GD::GIS::FontHelper.find("DejaVuSans"),
+              width: 5
+            }
+          },
+
+          water: {
+            water: {
+              color: [59, 130, 246]
+            }
+          },
+
+          parks: {
+            parks: {
+              color: [34, 197, 94]
+            }
+          },
+
+          points: {
+            points: {
+              color: [239, 68, 68],
+              radius: 4,
+              font: GD::GIS::FontHelper.find("DejaVuSans"),
+              font_color: [243, 244, 246]
+            }
+          },
+
+          track: {
+            track: {
+              stroke: [0, 85, 127, 250],
+              color: [250, 204, 21],
+              width: 2,
+              font_color: [243, 244, 246]
+            }
+          },
+
+          order: %i[water parks rails roads points track]
+            })
+      end
+
       # Normalizes a color definition into a GD::Color.
       #
       # Accepted formats:
