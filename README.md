@@ -56,7 +56,8 @@ libgd-gis is useful for:
 ## Example
 
 ```ruby
-map = GD::GIS::Map.new(  bbox: PARIS,
+map = GD::GIS::Map.new(
+  bbox: PARIS,
   zoom: 13,
   basemap: :carto_light)
 
