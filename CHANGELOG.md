@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+### 0.4.4
+
+- Improved README documentation
+- Added visual examples
+- Clarified usage examples
+
+---
+
 ## [0.4.3] - 2026-02-27
 
 ### Added
