@@ -56,7 +56,9 @@ libgd-gis is useful for:
 ## Example
 
 ```ruby
-map = GD::GIS::Map.new(width: 800, height: 600)
+map = GD::GIS::Map.new(  bbox: PARIS,
+  zoom: 13,
+  basemap: :carto_light)
 
 map.add_geojson("countries.geojson")
 map.add_point(lat: -34.6, lon: -58.4)
