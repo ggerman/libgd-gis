@@ -27,7 +27,6 @@
 <p align="right">
   <img src="docs/images/logo-gis.png" width="160" />
 </p>
-
 ![CI](https://github.com/ggerman/libgd-gis/actions/workflows/ci.yml/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/6bc3e7d6118d47e6959b16690b815909)](https://www.codacy.com/app/libgd-gis/libgd-gis?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=libgd-gis/libgd-gis&amp;utm_campaign=Badge_Grade)
 [![Test Coverage](https://coveralls.io/repos/githublibgd-gis/libgd-gis/badge.svg?branch=master)](https://coveralls.io/github/libgd-gis/libgd-gis?branch=master)
@@ -35,10 +34,37 @@
 
 ---
 
-**libgd-gis** is a lightweight Ruby GIS rendering library built on top of **GD**.
-It renders geographic data (GeoJSON, points, lines, polygons) into raster images using Web Mercator tiles and a simple, explicit rendering pipeline.
+**libgd-gis** is a A native map rendering engine for Ruby built on **libgd**.
 
-This library is designed for **map visualization**, not for spatial analysis.
+It allows developers to generate maps, tiles, and heatmaps directly from GeoJSON using the libgd raster engine — without external services.
+
+---
+
+## Use Cases
+
+libgd-gis is useful for:
+
+- Generating static maps for Rails applications
+- Rendering GeoJSON data to PNG images
+- Creating heatmaps and geographic visualizations
+- Building internal dashboards with map outputs
+- Self-hosted alternatives to static map APIs
+
+---
+
+## Example
+
+```ruby
+map = GD::GIS::Map.new(width: 800, height: 600)
+
+map.add_geojson("countries.geojson")
+map.add_point(lat: -34.6, lon: -58.4)
+map.render
+
+map.save("map.png")
+```
+
+![](examples/parana/parana.png)
 
 ---
 
@@ -47,27 +73,13 @@ This library is designed for **map visualization**, not for spatial analysis.
 ---
 ## Features
 
-- Web Mercator tile rendering (OSM, CARTO, ESRI, Stamen, etc.)
+- Web Mercator map and tile rendering (OSM, CARTO, ESRI, Stamen, etc.)
 - CRS normalization (CRS84, EPSG:4326, EPSG:3857, Gauss–Krüger Argentina)
 - Layered rendering pipeline
 - YAML-based styling
 - Rule-based semantic classification (ontology)
 - Points, lines, and polygons support
 - No heavy GIS dependencies
-
----
-
-## Non-Goals
-
-libgd-gis intentionally does **not** aim to be:
-
-- a spatial analysis engine
-- a replacement for PostGIS / GEOS
-- a full map server
-- a vector tile generator
-
-If you need projections beyond Web Mercator or topological correctness,
-use a full GIS stack.
 
 ---
 
@@ -126,19 +138,6 @@ map.save("map.png")
 ```
 
 ---
-
-## Styles Are Mandatory
-
-libgd-gis requires an explicit **style definition** in order to render a map.
-
-A `GD::GIS::Map` instance **will not render without a style**, and calling
-`map.render` before assigning one will raise an error.
-
-This is intentional.
-
-Styles define how semantic layers (roads, water, parks, points, etc.) are mapped
-to visual properties such as colors, stroke widths, fills, and drawing order.
-No implicit or default styling is applied.
 
 ### Example:
 
@@ -204,6 +203,8 @@ order:
 This design ensures predictable rendering and makes all visual decisions explicit
 and reproducible.
 
+![](examples/paris/paris.png)
+
 
 ---
 
@@ -212,6 +213,8 @@ and reproducible.
 
 LibGD-GIS includes a global dataset of predefined geographic areas.
 You can use them directly as the `bbox` parameter.
+
+![](examples/legend/example_parana_polaroid.png)
 
 ### Example
 
