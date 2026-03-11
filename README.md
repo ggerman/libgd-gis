@@ -33,6 +33,13 @@
 [![Test Coverage](https://coveralls.io/repos/githublibgd-gis/libgd-gis/badge.svg?branch=master)](https://coveralls.io/github/libgd-gis/libgd-gis?branch=master)
 [![Gem Version](https://img.shields.io/gem/v/libgd-gis.svg)](https://rubygems.org/gems/libgd-gis)
 
+
+---
+
+**libgd-gis** is a A native map rendering engine for Ruby built on **libgd**.
+
+It allows developers to generate maps, tiles, and heatmaps directly from GeoJSON using the libgd raster engine — without external services.
+
 ---
 
 **libgd-gis** is a A native map rendering engine for Ruby built on **libgd**.
