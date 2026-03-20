@@ -36,6 +36,10 @@
 
 ---
 
+Germán Alberto Giménez Silva | Remote | 🟢 Open to work
+
+---
+
 **libgd-gis** is a A native map rendering engine for Ruby built on **libgd**.
 
 It allows developers to generate maps, tiles, and heatmaps directly from GeoJSON using the libgd raster engine — without external services.
