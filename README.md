@@ -103,7 +103,7 @@ map.save("map.png")
 Add to your Gemfile:
 
 ```ruby
-gem "libgd-gis"
+gem install libgd-gis
 ```
 
 Then run:
