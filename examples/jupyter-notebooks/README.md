@@ -57,7 +57,4 @@ To run these notebooks, you need:
 # Install required gems
 gem install ruby-libgd
 gem install libgd-gis
-
-# Install IRuby kernel
-gem install iruby
-iruby register
+```
