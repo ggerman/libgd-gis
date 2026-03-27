@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    libgd-gis (0.4.3)
-      ruby-libgd (~> 0.2.3, >= 0.2.3)
+    libgd-gis (0.4.5)
+      ruby-libgd (>= 0.2.3, < 0.4.0)
 
 GEM
   remote: https://rubygems.org/

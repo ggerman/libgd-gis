@@ -1,0 +1,11 @@
+global:
+  label:
+    color: [35, 35, 35, 20]
+
+points:
+  color: [220, 50, 47, 200]      # Rojo intenso, semi-transparente (alpha=200)
+  font: /usr/share/fonts/truetype/lato/Lato-Regular.ttf
+  size: 14                        # Fuente más grande
+  font_color: [255, 255, 255, 255] # Texto blanco, opaco
+  icon: numeric                   # Usar número en círculo en lugar de imagen
+  radius: 12                      # Radio del círculo (si tu PointsLayer lo soporta)
