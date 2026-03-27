@@ -4,6 +4,8 @@ gemspec
 
 gem "open-uri"
 gem "ruby-libgd", "~> 0.2.1"
+gem "rgeo"
+gem "rgeo-proj4"
 
 group :development, :test do
   gem "chunky_png"

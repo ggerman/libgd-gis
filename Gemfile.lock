@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    libgd-gis (0.4.3)
+    libgd-gis (0.4.4)
       ruby-libgd (~> 0.2.3, >= 0.2.3)
 
 GEM
@@ -27,6 +27,9 @@ GEM
     rainbow (3.1.1)
     rake (13.3.1)
     regexp_parser (2.11.3)
+    rgeo (3.0.1)
+    rgeo-proj4 (4.0.0)
+      rgeo (~> 3.0.0)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -84,6 +87,8 @@ DEPENDENCIES
   libgd-gis!
   open-uri
   rake
+  rgeo
+  rgeo-proj4
   rspec
   rubocop (~> 1.60)
   rubocop-performance (~> 1.20)
