@@ -26,9 +26,7 @@ module GD
       # @raise [JSON::ParserError] if the file is invalid JSON
       # @raise [Errno::ENOENT] if the file does not exist
       def self.load(source)
-
-        geojson = case source
-
+        data = case source
         when String
           if source.strip.start_with?("{", "[")
             JSON.parse(source)
