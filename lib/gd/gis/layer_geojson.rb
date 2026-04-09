@@ -77,17 +77,13 @@ module GD
       end
 
       def self.validate_geojson!(data)
-        unless data.is_a?(Hash)
-          raise ArgumentError, "GeoJSON must be an object"
-        end
+        raise ArgumentError, "GeoJSON must be an object" unless data.is_a?(Hash)
 
-        unless data["type"] == "FeatureCollection"
-          raise ArgumentError, "Only FeatureCollection is supported"
-        end
+        raise ArgumentError, "Only FeatureCollection is supported" unless data["type"] == "FeatureCollection"
 
-        unless data["features"].is_a?(Array)
-          raise ArgumentError, "GeoJSON must contain features array"
-        end
+        return if data["features"].is_a?(Array)
+
+        raise ArgumentError, "GeoJSON must contain features array"
       end
 
       # Normalizes a GeoJSON geometry in-place.
