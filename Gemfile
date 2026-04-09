@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "open-uri"
-gem "ruby-libgd", "~> 0.3.0"
+gem "ruby-libgd", "~> 0.2.1"
 
 group :development, :test do
   gem "chunky_png"
