@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name        = "libgd-gis"
-  spec.version     = "0.4.5"
+  spec.version     = "0.4.7"
   spec.summary     = "Geospatial raster rendering for Ruby using libgd"
   spec.description = "A native GIS raster engine for Ruby built on libgd. Render maps, GeoJSON, heatmaps and tiles."
   spec.authors     = ["Germán Alberto Giménez Silva"]
@@ -11,6 +11,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.required_ruby_version = ">= 3.3"
-  spec.add_dependency "ruby-libgd", ">= 0.2.3", "< 0.4.0"
+  spec.add_dependency "ruby-libgd", ">= 0.3.0", "< 0.4.0"
   spec.metadata['rubygems_mfa_required'] = 'true'
 end

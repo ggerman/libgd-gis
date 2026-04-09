@@ -25,8 +25,21 @@ module GD
       # @return [Array<GD::GIS::Feature>]
       # @raise [JSON::ParserError] if the file is invalid JSON
       # @raise [Errno::ENOENT] if the file does not exist
-      def self.load(path)
-        data = JSON.parse(File.read(path))
+      def self.load(source)
+
+        geojson = case source
+
+        when String
+          if source.strip.start_with?("{", "[")
+            JSON.parse(source)
+          else
+            JSON.parse(File.read(source))
+          end
+        when Hash
+          source
+        else
+          raise ArgumentError, "Unsupported GeoJSON source"
+        end
 
         # 1) Detect CRS
         crs_name   = data["crs"]&.dig("properties", "name")
