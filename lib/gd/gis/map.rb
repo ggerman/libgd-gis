@@ -334,9 +334,9 @@ module GD
       #
       # @param path [String] path to GeoJSON file
       # @return [void]
-      def add_geojson(path)
+      def add_geojson(source)
         @style ||= GD::GIS::Style.default
-        features = LayerGeoJSON.load(path)
+        features = LayerGeoJSON.load(source)
 
         features.each do |feature|
           maybe_create_line_label(feature)
