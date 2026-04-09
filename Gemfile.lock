@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    libgd-gis (0.4.5)
-      ruby-libgd (>= 0.2.3, < 0.4.0)
+    libgd-gis (0.4.9)
+      ruby-libgd (>= 0.3.0, < 0.4.0)
 
 GEM
   remote: https://rubygems.org/
@@ -58,7 +58,7 @@ GEM
       lint_roller (~> 1.1)
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.47.1, < 2.0)
-    ruby-libgd (0.2.3)
+    ruby-libgd (0.3.0)
     ruby-progressbar (1.13.0)
     stringio (3.2.0)
     time (0.4.2)
@@ -87,7 +87,7 @@ DEPENDENCIES
   rspec
   rubocop (~> 1.60)
   rubocop-performance (~> 1.20)
-  ruby-libgd (~> 0.2.1)
+  ruby-libgd (~> 0.3.0)
 
 BUNDLED WITH
    2.5.22
