@@ -26,18 +26,9 @@ module GD
       # @raise [JSON::ParserError] if the file is invalid JSON
       # @raise [Errno::ENOENT] if the file does not exist
       def self.load(source)
-        data = case source
-        when String
-          if source.strip.start_with?("{", "[")
-            JSON.parse(source)
-          else
-            JSON.parse(File.read(source))
-          end
-        when Hash
-          source
-        else
-          raise ArgumentError, "Unsupported GeoJSON source"
-        end
+        data = normalize_source(source)
+
+        validate_geojson!(data)
 
         # 1) Detect CRS
         crs_name   = data["crs"]&.dig("properties", "name")
@@ -47,13 +38,55 @@ module GD
         ontology = Ontology.new
 
         # 3) Normalize geometries + classify
-        data["features"].map do |f|
-          normalize_geometry!(f["geometry"], normalizer)
+        data["features"].map do |feature|
+          geometry   = feature["geometry"]
+          properties = feature["properties"] || {}
+
+          raise ArgumentError, "Missing geometry" unless geometry
+          raise ArgumentError, "Missing geometry type" unless geometry["type"]
+          raise ArgumentError, "Missing coordinates" unless geometry["coordinates"]
+
+          normalize_geometry!(geometry, normalizer)
+
           layer = ontology.classify(
-            f["properties"] || {},
-            geometry_type: f["geometry"]["type"]
+            properties,
+            geometry_type: geometry["type"]
           )
-          Feature.new(f["geometry"], f["properties"], layer)
+
+          Feature.new(geometry, properties, layer)
+        end
+      end
+
+      def self.normalize_source(source)
+        case source
+        when Hash
+          source
+
+        when String
+          begin
+            JSON.parse(source)
+          rescue JSON::ParserError
+            raise ArgumentError, "File not found: #{source}" unless File.exist?(source)
+
+            JSON.parse(File.read(source))
+          end
+
+        else
+          raise ArgumentError, "Unsupported GeoJSON source: #{source.class}"
+        end
+      end
+
+      def self.validate_geojson!(data)
+        unless data.is_a?(Hash)
+          raise ArgumentError, "GeoJSON must be an object"
+        end
+
+        unless data["type"] == "FeatureCollection"
+          raise ArgumentError, "Only FeatureCollection is supported"
+        end
+
+        unless data["features"].is_a?(Array)
+          raise ArgumentError, "GeoJSON must contain features array"
         end
       end
 
