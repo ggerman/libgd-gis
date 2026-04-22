@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-69.238, -36.4222] },
+      "properties": {
+        "name": "Payún Matrú",
+        "natural": "volcano"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-69.2848, -36.5104] },
+      "properties": {
+        "name": "Payún Liso",
+        "natural": "volcano"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-69.15, -36.35] },
+      "properties": {
+        "name": "Volcán Santa María",
+        "natural": "volcano"
+      }
+    }
+  ]
+}
