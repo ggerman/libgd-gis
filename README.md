@@ -36,7 +36,7 @@
 
 ---
 
-Germán Alberto Giménez Silva | Remote | 🟢 Open to work
+Germán Alberto Giménez Silva | Remote
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-MapView-22c55e?style=for-the-badge)](https://map-view-demo.up.railway.app)
 
